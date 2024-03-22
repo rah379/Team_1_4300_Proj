@@ -69,6 +69,28 @@
     align-items: center;
 }
 
+.button-search {
+    padding: 20px;
+    text-align: center;
+}
+
+.btn {
+    padding: 10px 20px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    border: none; 
+    background-color: #3f72af; 
+    color: white; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
 .input-box input{
     width: 100%;
     margin-left: 10px;
