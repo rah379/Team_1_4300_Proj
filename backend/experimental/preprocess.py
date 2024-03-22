@@ -1,7 +1,7 @@
 import json
 import re
-from collections import defaultdict
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import pandas as pd
 from nltk.stem import PorterStemmer
@@ -54,7 +54,7 @@ for individual in tweets_data.keys():
 for i in range(0, len(list_words)):
     list_words[i] = " ".join(list_words[i])
 # print(len(list_words[1]))
-list_words.append("america first")
+list_words.append("america one")
 
 
 vectorizer = TfidfVectorizer()
@@ -62,11 +62,18 @@ counter = CountVectorizer()
 
 # TD-IDF Matrix
 tfidf = vectorizer.fit_transform(list_words)
+print("HERE")
+cs = cosine_similarity(tfidf, tfidf)
+# cs.sort()
+relevant = (-cs[-1]).argsort()[1:]
+for r in relevant:
+    print(list(tweets_data.keys())[r])
+# print(cs.sort())
 # counts = counter.fit_transform(list_words)
 # print(counts)
-print(tfidf.shape)
+# print(tfidf.shape)
 # print(len(tfidf[2]))
-print(tfidf[0, 1900])
+# print(tfidf[0, 1900])
 # print(tfidf)
 
 
