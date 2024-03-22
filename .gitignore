@@ -18,3 +18,8 @@ build/
 *.egg-info/
 helpers/*
 json_template/
+
+lib/
+bin/
+pyvenv.cfg
+
