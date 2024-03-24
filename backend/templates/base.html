@@ -9,12 +9,12 @@
 <body>
     <div class="full-body-container">
         <div class="top-text">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%;"/>
+            <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%;" />
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
                 <input placeholder="Search for a Politician (based on political view)" id="filter-text-val">
             </div>
-           
+
         </div>
         <div class="button-search">
             <button type="button" class="btn" onclick="poliSearch();">Search</button>
@@ -63,8 +63,11 @@
                 .then((data) => {
                     console.log(data)
                     let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(data["matches"][0], data["matches"][0], data["matches"][0])
+                    tempDiv.innerHTML = answerBoxTemplate(data["matches"][0], data["similarity"][0], "N/A")
                     document.getElementById("answer-box").appendChild(tempDiv)
+                    let tempDiv2 = document.createElement("div")
+                    tempDiv2.innerHTML = answerBoxTemplate(data["matches"][1], data["similarity"][1], "N/A")
+                    document.getElementById("answer-box").appendChild(tempDiv2)
                 });
             // .then((data) => data.forEach(row => {
 

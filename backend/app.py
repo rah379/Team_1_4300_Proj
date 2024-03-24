@@ -63,15 +63,15 @@ for individual in tweets_data.keys():
 for i in range(0, len(list_words)):
     list_words[i] = " ".join(list_words[i])
 # print(len(list_words[1]))
-
+print(len(list_words))
 
 vectorizer = TfidfVectorizer()
 counter = CountVectorizer()
 
 # TD-IDF Matrix
 tfidf = vectorizer.fit_transform(list_words)
-print("HERE")
-print(cosine_similarity(tfidf, tfidf))
+# print("HERE")
+# print(cosine_similarity(tfidf, tfidf))
 
 app = Flask(__name__)
 CORS(app)
@@ -81,8 +81,9 @@ CORS(app)
 
 def cossim_search(query):
     # matches = []
-
     list_words.append(query.lower())
+    query = [ps.stem(word) for word in splitter.split(query.lower())]
+    print(query)
     tfidf = vectorizer.fit_transform(list_words)
     cossim = cosine_similarity(tfidf, tfidf)
     print(cossim)
@@ -95,9 +96,9 @@ def cossim_search(query):
             ret.append(list(tweets_data.keys())[r])
     data = {
         "matches": ret,
+        "similarity": cossim[-1][relevant].tolist()
     }
-    print(json.dumps(data))
-    list_words.remove(query.lower())
+    list_words.pop()
     return json.dumps(data)
 
     # merged_df = pd.merge(episodes_df, reviews_df,
