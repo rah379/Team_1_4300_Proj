@@ -1,0 +1,190 @@
+"""preprocess the json or csv files here"""
+import json
+from sklearn.feature_extraction.text import TfidfVectorizer
+import pandas as pd
+import re
+from scipy.sparse.linalg import svds
+import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import normalize
+
+
+def convert_to_documents(tweets_data):
+    """converts the tweets data to a list of megadocuments"""
+    """tweets data is a json file"""
+    docs = []
+    index_to_politician = {}
+    i = 0
+    with open(tweets_data, 'r') as f:
+        data = json.load(f)
+
+    def remove_long_words(text, length=15):
+        # Split the text into words
+        words = text.split()
+
+        # Filter out words longer than 15 characters
+        filtered_words = [word for word in words if len(word) <= length]
+
+        # Join the filtered words back into a string
+        filtered_text = ' '.join(filtered_words)
+
+        return filtered_text
+
+    def remove_numbers(text):
+        # Split the text into words
+        words = text.split()
+
+        # Define a regular expression pattern to match numeric characters
+        numeric_pattern = re.compile(r'\d')
+        underscore_pattern = re.compile(r'\b\w+_\w+\b')
+
+        # Filter out words containing numeric characters
+        filtered_words = [
+            word for word in words if not numeric_pattern.search(word) and not underscore_pattern.search(word)]
+
+        # Join the filtered words back into a string
+        filtered_text = ' '.join(filtered_words)
+
+        return filtered_text
+
+    for user in data.keys():
+        # print(user)
+        tweets = [data[user][i]['Content'] for i in range(len(data[user]))]
+        full_doc = " ".join(tweets)
+        full_doc = remove_long_words(full_doc)
+        full_doc = remove_numbers(full_doc)  # also removes underscores
+        docs.append(full_doc)
+        index_to_politician[i] = user
+        i += 1
+        # break
+    return docs, index_to_politician
+
+
+def create_tfidf_matrix(docs, max_df=.7, min_df=3):
+    """create a tfidf matrix from the list of documents
+    this tfidf matrix is in the form of a pandas df"""
+    vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
+                                 min_df=min_df)
+    X = vectorizer.fit_transform(docs)
+    tfidf_tokens = vectorizer.get_feature_names_out()
+    # print(tfidf_tokens)
+    result = pd.DataFrame(
+        data=X.toarray(),
+        index=[f"doc_{i}" for i in range(len(docs))],
+        columns=tfidf_tokens
+    )
+    result.to_csv('data/tfidf_matrix.csv', index='False')
+    return X, vectorizer
+
+
+def create_svd(tfidf, k=100):
+    """create a U, Sigma, Vt from the tfidf matrix"""
+    # pass
+    u, s, v_trans = svds(tfidf, k=k)
+    return u, s, v_trans
+
+
+def save_as_json(data, filename):
+    with open(filename, 'w') as f:
+        json.dump(data, f)
+
+
+# testing
+docs, itp = convert_to_documents('data/tweets/clean.json')
+# save_as_json(itp, 'data/index_politicians.json')
+
+
+X, vectorizer = create_tfidf_matrix(docs)
+vocab = vectorizer.vocabulary_
+# save_as_json(vocab, 'data/vocab.json')
+index_to_word = {i: t for t, i in vocab.items()}
+# save_as_json(index_to_word, 'data/index_words.json')
+# vocab and index_words are inverses
+
+# SVD (K = 40)
+docs_compressed, s, words_compressed = create_svd(X, k=40)
+# dc = 216, 40
+# s = 40,40
+# wc = 40, 8037
+
+
+# TRANSPOSED!
+words_compressed_normed = normalize(words_compressed, axis=1).transpose()
+# wcn = 8037, 40
+
+docs_compressed_normed = normalize(docs_compressed)
+
+np.save('data/numpy/wcn_tranpose', words_compressed_normed)
+np.save('data/numpy/dcn', docs_compressed_normed)
+np.save('data/numpy/dc', docs_compressed)
+np.save('data/numpy/wc', words_compressed)
+
+
+# def closest_words(word_in, words_representation_in, k=10):
+#     if word_in not in vocab:
+#         return "Not in vocab."
+#     sims = words_representation_in.dot(
+#         words_representation_in[vocab[word_in], :])
+#     asort = np.argsort(-sims)[:k+1]
+#     return [(index_to_word[i], sims[i]) for i in asort[1:]]
+
+
+# Xnorm = X.transpose().toarray()
+# Xnorm = normalize(Xnorm)
+
+# word = 'hate'
+# print("Using SVD:")
+# for w, sim in closest_words(word, words_compressed_normed):
+#     try:
+#         print("{}, {:.3f}".format(w, sim))
+#     except:
+#         print("word not found")
+# print()
+
+
+# # this is basically the same cosine similarity code that we used before, just with some changes to
+# # the returned output format to let us print out the documents in a sensible way
+
+
+# def closest_projects(project_index_in, project_repr_in, k=5):
+#     sims = project_repr_in.dot(project_repr_in[project_index_in, :])
+#     asort = np.argsort(-sims)[:k+1]
+#     return [(itp[i], sims[i]) for i in asort[1:]]
+
+
+# def closest_projects_to_word(word_in, k=5):
+#     if word_in not in vocab:
+#         return "Not in vocab."
+#     sims = docs_compressed_normed.dot(
+#         words_compressed_normed[vocab[word_in], :])
+#     asort = np.argsort(-sims)[:k+1]
+#     return [(i, itp[i], sims[i]) for i in asort[1:]]
+
+
+# # for i, proj, sim in closest_projects_to_word("florida"):
+# #     print("({}, {}, {:.4f}".format(i, proj, sim))
+
+
+# cossine similarity
+def query_search(query, docs, words_compressed, docs_compressed_normed, itp, k=5, max_df=0.7, min_df=3):
+    vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
+                                 min_df=min_df)
+    vectorizer.fit_transform(docs)
+    query_tfidf = vectorizer.transform([query]).toarray()
+    print(query_tfidf.shape)
+    query_vec = normalize(
+        np.dot(query_tfidf, words_compressed.transpose())).squeeze()
+    sims = docs_compressed_normed.dot(query_vec)
+    asort = np.argsort(-sims)[:k+1]
+    return [(i, itp[i], sims[i]) for i in asort[1:]]
+
+
+# for i, proj, sim in query_search("big banana", docs, words_compressed_normed.transpose(), docs_compressed_normed, itp):
+#     print("({}, {}, {:.4f}".format(i, proj, sim))
+
+# # plt.plot(s[::-1])
+# # plt.xlabel("Singular value number")
+# # plt.ylabel("Singular value")
+# # plt.show()
+# # print(df.head())

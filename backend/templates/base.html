@@ -54,10 +54,6 @@
 
         function poliSearch() {
             document.getElementById("answer-box").innerHTML = ""
-            // console.log(document.getElementById("filter-text-val").value)
-            // let tempDiv = document.createElement("div")
-            // tempDiv.innerHTML = answerBoxTemplate("HELLO", "HELLO", "HELLO")
-            // document.getElementById("answer-box").appendChild(tempDiv)
             fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
                 .then((response) => response.json())
                 .then((data) => {
@@ -66,7 +62,7 @@
                     tempDiv.innerHTML = answerBoxTemplate(data["matches"][0], data["similarity"][0], "N/A")
                     document.getElementById("answer-box").appendChild(tempDiv)
                     let tempDiv2 = document.createElement("div")
-                    tempDiv2.innerHTML = answerBoxTemplate(data["matches"][1], data["similarity"][1], "N/A")
+                    tempDiv2.innerHTML = answerBoxTemplate(data["matches"][1], data["similarity"][1], "HERE")
                     document.getElementById("answer-box").appendChild(tempDiv2)
                 });
             // .then((data) => data.forEach(row => {

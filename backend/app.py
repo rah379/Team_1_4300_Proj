@@ -23,7 +23,7 @@ json_file_path = os.path.join(current_directory, 'init.json')
 with open(json_file_path, 'r') as file:
     tweets_data = json.load(file)
 
-
+print(tweets_data.keys())
 ######
 word_regex = re.compile(r"""
     (\w+)
@@ -79,6 +79,9 @@ CORS(app)
 # Sample search using json with pandas
 
 
+# maybe we can build out the cosine similarity matrix before? and just load that information in
+
+
 def cossim_search(query):
     # matches = []
     list_words.append(query.lower())
@@ -100,14 +103,6 @@ def cossim_search(query):
     }
     list_words.pop()
     return json.dumps(data)
-
-    # merged_df = pd.merge(episodes_df, reviews_df,
-    #                      left_on='id', right_on='id', how='inner')
-    # matches = merged_df[merged_df['title'].str.lower(
-    # ).str.contains(query.lower())]
-    # matches_filtered = matches[['title', 'descr', 'imdb_rating']]
-    # matches_filtered_json = matches_filtered.to_json(orient='records')
-    # return matches_filtered_json
 
 # we should also print out tweets/popularity
 
