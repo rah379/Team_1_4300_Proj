@@ -21,6 +21,7 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         "index": [int(i) for i in asort[1:]],
         "matches": [itp[str(i)][0] for i in asort[1:]],
         "handles": [itp[str(i)][1] for i in asort[1:]],
+        "profile_images": [itp[str(i)][2] for i in asort[1:]],
         "similarity": [sims[i] for i in asort[1:]]
     }
     # return remove_zeros(record)
