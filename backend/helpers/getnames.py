@@ -1,15 +1,22 @@
 import pandas as pd
 import numpy as np
+import json
 
+
+# save all names
 df = pd.read_csv('data/people.csv', on_bad_lines='skip')[:528]
-print(df)
-# df = df.concat("Joe Biden")
-# df = df.append("Joe Biden")
+
 names = []
 for key in df["name"]:
     words = key.split()
 
     names.append(key)
-print(names)
-np.save("data/numpy/names.npy", names)
-# print(names)
+np.save("data/numpy/all_names.npy", names)
+
+# save current names
+with open('data/json/index_politicians.json', 'r') as file:
+    itp = json.load(file)
+
+# print([key for key in itp.keys()])
+curr_names = [itp[key][0] for key in itp.keys()]
+print(curr_names)

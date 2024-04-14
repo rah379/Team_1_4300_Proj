@@ -92,15 +92,15 @@ def save_as_json(data, filename):
 
 # saving files
 docs, itp = convert_to_documents('data/tweets/clean.json')
-save_as_json(itp, 'data/index_politicians.json')
+save_as_json(itp, 'data/json/index_politicians.json')
 save_as_json(docs, 'data/json/docs.json')
 
 
 X, vectorizer = create_tfidf_matrix(docs)
 vocab = vectorizer.vocabulary_
-save_as_json(vocab, 'data/vocab.json')
+save_as_json(vocab, 'data/json/vocab.json')
 index_to_word = {i: t for t, i in vocab.items()}
-save_as_json(index_to_word, 'data/index_words.json')
+save_as_json(index_to_word, 'data/json/index_words.json')
 # vocab and index_words are inverses
 
 # SVD (K = 40)
@@ -116,7 +116,7 @@ words_compressed_normed = normalize(words_compressed, axis=1).transpose()
 
 docs_compressed_normed = normalize(docs_compressed)
 
-np.save('data/numpy/wcn_tranpose', words_compressed_normed)
+np.save('data/numpy/wcn_transpose', words_compressed_normed)
 np.save('data/numpy/dcn', docs_compressed_normed)
 np.save('data/numpy/dc', docs_compressed)
 np.save('data/numpy/wc', words_compressed)

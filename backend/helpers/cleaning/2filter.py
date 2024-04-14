@@ -54,6 +54,7 @@ irrelevant = [
     "California Governor's Office of Emergency Services",
     "Senate Commerce, Science, Transportation Committee",
     "Senate Ag Committee Republicans",
+    "Gregory",
 ]
 
 duplicates = {
@@ -123,4 +124,4 @@ def combine_aliased_keys(json_file, output, alias_map):
 
 
 combine_aliased_keys('data/tweets/raw.json',
-                     'data/tweets/clean2.json', duplicates)
+                     'data/tweets/clean.json', duplicates)
