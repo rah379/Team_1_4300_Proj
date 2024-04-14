@@ -3,43 +3,30 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-  rel="stylesheet"
-/>
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css"
-/>
-<script
-  type="module"
-  src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"
-></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+    rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
+<script type="module"
+    src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
 
 <body>
-  <div class="full-body-container">
-    <div class="top-text">
-      <img
-        src="{{ url_for('static', filename='images/logo.png') }}"
-        style="width: 75%"
-      />
-      <div class="input-box" onclick="sendFocus()">
-        <img src="{{ url_for('static', filename='images/mag.png') }}" />
-        <input
-          placeholder="Search for a Politician (based on political view)"
-          id="filter-text-val"
-        />
-      </div>
+    <div class="full-body-container">
+        <div class="top-text">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%" />
+            <div class="input-box" onclick="sendFocus()">
+                <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                <input placeholder="Search for a Politician (based on political view)" id="filter-text-val" />
+            </div>
+        </div>
+        <div class="button-search">
+            <button type="button" class="btn" onclick="poliSearch();">Search</button>
+        </div>
+        <div id="answer-box"></div>
     </div>
-    <div class="button-search">
-      <button type="button" class="btn" onclick="poliSearch();">Search</button>
-    </div>
-    <div id="answer-box"></div>
-  </div>
 
-  <script>
-    function answerBoxTemplate(title, titleDesc, account, rating) {
-      return `<sl-card class='result'>
+    <script>
+        function answerBoxTemplate(title, titleDesc, account, rating) {
+            return `<sl-card class='result'>
                 <div slot="header">
                 <h3 class='episode-title'>${title}</h3>
                 </div>
@@ -48,60 +35,68 @@
                 <p class='episode-rating'>Twitter Account: <a href= https://twitter.com/${account}>${account}</a></p>
                 <p class='episode-rating'>Matched Tweets: ${rating}</p>
             </sl-card>`;
-    }
+        }
 
-    function sendFocus() {
-      document.getElementById("filter-text-val").focus();
-    }
+        function sendFocus() {
+            document.getElementById("filter-text-val").focus();
+        }
 
-    // function filterText() {
-    //     document.getElementById("answer-box").innerHTML = ""
-    //     console.log(document.getElementById("filter-text-val").value)
-    //     console.log("HELLO??")
-    //     fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-    //         .then((response) => response.json())
-    //         .then((data) => data.forEach(row => {
+        // function filterText() {
+        //     document.getElementById("answer-box").innerHTML = ""
+        //     console.log(document.getElementById("filter-text-val").value)
+        //     console.log("HELLO??")
+        //     fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
+        //         .then((response) => response.json())
+        //         .then((data) => data.forEach(row => {
 
-    //             let tempDiv = document.createElement("div")
-    //             tempDiv.innerHTML = answerBoxTemplate(row.title, row.descr, row.imdb_rating)
-    //             document.getElementById("answer-box").appendChild(tempDiv)
-    //         }));
-    // }
+        //             let tempDiv = document.createElement("div")
+        //             tempDiv.innerHTML = answerBoxTemplate(row.title, row.descr, row.imdb_rating)
+        //             document.getElementById("answer-box").appendChild(tempDiv)
+        //         }));
+        // }
 
-    function poliSearch() {
-      document.getElementById("answer-box").innerHTML = "";
-      fetch(
-        "/episodes?" +
-          new URLSearchParams({
-            title: document.getElementById("filter-text-val").value,
-          }).toString()
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          let tempDiv = document.createElement("div");
-          tempDiv.innerHTML = answerBoxTemplate(
-            data["matches"][0],
-            data["similarity"][0],
-            data["handles"][0],
-            "NA - fill in with matched tweets"
-          );
-          document.getElementById("answer-box").appendChild(tempDiv);
-          let tempDiv2 = document.createElement("div");
-          tempDiv2.innerHTML = answerBoxTemplate(
-            data["matches"][1],
-            data["similarity"][1],
-            data["handles"][1],
-            "NA - fill in with matched tweets"
-          );
-          document.getElementById("answer-box").appendChild(tempDiv2);
-        });
-      // .then((data) => data.forEach(row => {
+        function poliSearch() {
+            document.getElementById("answer-box").innerHTML = "";
+            fetch(
+                "/episodes?" +
+                new URLSearchParams({
+                    title: document.getElementById("filter-text-val").value,
+                }).toString()
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    for (let i = 0; i < data["matches"].length; i++) {
+                        let tempDiv = document.createElement("div");
+                        tempDiv.innerHTML = answerBoxTemplate(
+                            data["matches"][i],
+                            data["similarity"][i],
+                            data["handles"][i],
+                            "NA - fill in with matched tweets"
+                        );
+                        document.getElementById("answer-box").appendChild(tempDiv);
+                    }
+                    // tempDiv.innerHTML = answerBoxTemplate(
+                    //     data["matches"][0],
+                    //     data["similarity"][0],
+                    //     data["handles"][0],
+                    //     "NA - fill in with matched tweets"
+                    // );
+                    // document.getElementById("answer-box").appendChild(tempDiv);
+                    // let tempDiv2 = document.createElement("div");
+                    // tempDiv2.innerHTML = answerBoxTemplate(
+                    //     data["matches"][1],
+                    //     data["similarity"][1],
+                    //     data["handles"][1],
+                    //     "NA - fill in with matched tweets"
+                    // );
+                    // document.getElementById("answer-box").appendChild(tempDiv2);
+                });
+            // .then((data) => data.forEach(row => {
 
-      //     let tempDiv = document.createElement("div")
-      //     tempDiv.innerHTML = answerBoxTemplate(row[0], row[0], row[0])
-      //     document.getElementById("answer-box").appendChild(tempDiv)
-      // }));
-    }
-  </script>
+            //     let tempDiv = document.createElement("div")
+            //     tempDiv.innerHTML = answerBoxTemplate(row[0], row[0], row[0])
+            //     document.getElementById("answer-box").appendChild(tempDiv)
+            // }));
+        }
+    </script>
 </body>
