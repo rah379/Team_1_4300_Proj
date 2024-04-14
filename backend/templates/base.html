@@ -1,5 +1,5 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
+<title>{% block title %}{% endblock %} Polipredictor</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
     <script>
 
         function answerBoxTemplate(title, titleDesc, account, rating) {
-            return `<div class=''>
+            return `<div class='result'>
                 <h3 class='episode-title'>${title}</h3>
                 <p class='episode-desc'>Similarity Score: ${titleDesc}</p>
                 <p class='episode-rating'>Twitter Account: ${account}</p>
