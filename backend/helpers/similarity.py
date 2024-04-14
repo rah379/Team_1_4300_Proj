@@ -4,51 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 import numpy as np
 import pandas as pd
-
-
-# def closest_words(word_in, words_representation_in, k=10):
-#     if word_in not in vocab:
-#         return "Not in vocab."
-#     sims = words_representation_in.dot(
-#         words_representation_in[vocab[word_in], :])
-#     asort = np.argsort(-sims)[:k+1]
-#     return [(index_to_word[i], sims[i]) for i in asort[1:]]
-
-
-# Xnorm = X.transpose().toarray()
-# Xnorm = normalize(Xnorm)
-
-# word = 'hate'
-# print("Using SVD:")
-# for w, sim in closest_words(word, words_compressed_normed):
-#     try:
-#         print("{}, {:.3f}".format(w, sim))
-#     except:
-#         print("word not found")
-# print()
-
-
-# # this is basically the same cosine similarity code that we used before, just with some changes to
-# # the returned output format to let us print out the documents in a sensible way
-
-
-# def closest_projects(project_index_in, project_repr_in, k=5):
-#     sims = project_repr_in.dot(project_repr_in[project_index_in, :])
-#     asort = np.argsort(-sims)[:k+1]
-#     return [(itp[i], sims[i]) for i in asort[1:]]
-
-
-# def closest_projects_to_word(word_in, k=5):
-#     if word_in not in vocab:
-#         return "Not in vocab."
-#     sims = docs_compressed_normed.dot(
-#         words_compressed_normed[vocab[word_in], :])
-#     asort = np.argsort(-sims)[:k+1]
-#     return [(i, itp[i], sims[i]) for i in asort[1:]]
-
-
-# # for i, proj, sim in closest_projects_to_word("florida"):
-# #     print("({}, {}, {:.4f}".format(i, proj, sim))
+import json
 
 
 # svd cossine sim for top 10
@@ -70,11 +26,6 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
     return record
 
 
-def cosine_sim(query, tfidf):
-    """basic similarity measure between a query and tfidf matrix"""
-    pass
-
-
 def autocorrect(query, keywords, max_dist=2):
     """uses levenshtein edit distance to match query to words in a given list of words
     basically checking if mistakes were made and then correcting that
@@ -86,15 +37,33 @@ def autocorrect(query, keywords, max_dist=2):
     # pass
 
 
-def boolean_search(query, names):
+with open('data/json/index_politicians.json', 'r') as f:
+    itp = json.load(f)
+
+
+def boolean_search(query, itp):
     """does boolean search on the query with the politician name
     this is helpful if we're just searching up an individual politician
     might be helpful to run levenshtein distance first to standardize
 
     query: string
-    names: list of politician names """
+    itp: index to politicians dictionary (can convert into names list)"""
+    ret = []
+    curr_names = [itp[key][0] for key in itp.keys()]
+    query = autocorrect(query, curr_names)
 
-    query = autocorrect(query, names)
+    qwords = query.lower().split()
+    for i in range(len(curr_names)):
+        curr_name = curr_names[i]
+        cwords = curr_name.lower().split()
+        intersection = [value for value in qwords if value in cwords]
+        # print(len(intersection))
+        if (len(intersection) / len(cwords) > 0.5):
+            ret.append(curr_name)
+    return ret
+
+
+print(boolean_search("joe biden", itp))
 
 
 def svd_transform(doc_matrix):
