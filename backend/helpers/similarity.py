@@ -28,6 +28,7 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
     return record
 
 
+# NOT FUNCTIONAL
 def remove_zeros(results):
     """removes zero similarity results from the results"""
     for i in range(len(results['similarity'])):
@@ -51,10 +52,6 @@ def autocorrect(query, keywords, max_dist=2):
     # pass
 
 
-with open('data/json/index_politicians.json', 'r') as f:
-    itp = json.load(f)
-
-
 def boolean_search(query, itp):
     """does boolean search on the query with the politician name
     this is helpful if we're just searching up an individual politician
@@ -72,17 +69,26 @@ def boolean_search(query, itp):
         cwords = curr_name.lower().split()
         intersection = [value for value in qwords if value in cwords]
         # print(len(intersection))
-        if (len(intersection) / len(cwords) > 0.5):
-            ret.append(curr_name)
-    return ret
+        # if (len(intersection) / len(cwords) > 0):
+        if (len(intersection) / len(cwords) > 0.5) and (len(intersection) / len(qwords) > 0.5):
+            # we want good matches
+            ret.append((i, curr_name, len(intersection) / len(cwords)))
+    ret = sorted(ret, key=lambda x: x[2], reverse=True)
+    record = None
+    if len(ret) > 0:
+        record = {
+            "index": [element[0] for element in ret],
+            "matches": [ele[1] for ele in ret],
+            "handles": [itp[str(ele[0])][1] for ele in ret],
+            "profile_images": [itp[str(ele[0])][2] for ele in ret],
+            "similarity": [ele[2] for ele in ret]
+        }
+    return record
 
 
-print(boolean_search("joe biden", itp))
-
-
-def svd_transform(doc_matrix):
-    """transform a doc_matrix or tfidf matrix into a svd approximation"""
-    pass
+# with open('data/json/index_politicians.json', 'r') as f:
+#     itp = json.load(f)
+# print(boolean_search("catherine cortez masto", itp))
 
 
 def find_key_tweets(query, user_tweets):
@@ -90,7 +96,7 @@ def find_key_tweets(query, user_tweets):
     most likely using bool ean search?
 
     query: string
-    user tweets: a list of strings OR list of array of tokens
+    user tweets: a list of strings OR list of array of tokens (probably based on user)
 
 
     """

@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, request
 from flask_cors import CORS
 import numpy as np
-from helpers.similarity import svd_cos
+from helpers.similarity import svd_cos, boolean_search
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
 os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..", os.curdir))
@@ -46,7 +46,10 @@ def home():
 def episodes_search():
     text = request.args.get("title")
     # print(svd_cos(text, docs, wcnt, dcn, itp))
-    return json.dumps(svd_cos(text, docs, wcnt, dcn, itp))
+    record = boolean_search(text, itp)
+    if record is None:
+        record = svd_cos(text, docs, wcnt, dcn, itp)
+    return json.dumps(record)
 
 
 if 'DB_NAME' not in os.environ:
