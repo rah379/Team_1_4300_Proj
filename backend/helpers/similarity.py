@@ -8,7 +8,7 @@ import json
 
 
 # svd cossine sim for top 10
-def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_normed, itp, k=5, max_df=0.7, min_df=3):
+def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.7, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
                                  min_df=min_df)
     vectorizer.fit_transform(docs)
@@ -23,7 +23,19 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         "handles": [itp[str(i)][1] for i in asort[1:]],
         "similarity": [sims[i] for i in asort[1:]]
     }
-    return record
+    return remove_zeros(record)
+
+
+def remove_zeros(results):
+    """removes zero similarity results from the results"""
+    for i in range(len(results['similarity'])):
+        if results['similarity'][i] == 0:
+            results['similarity'].pop(i)
+            results['index'].pop(i)
+            results['matches'].pop(i)
+            results['handles'].pop(i)
+    # add logic for if all zeros
+    return results
 
 
 def autocorrect(query, keywords, max_dist=2):
