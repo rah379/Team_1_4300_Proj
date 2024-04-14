@@ -12,7 +12,12 @@ for i in range(0, len(df_clean)):
             data[df_clean[i]['Name']] = []
         if df_clean[i]['Content'] != "":
             data[df_clean[i]['Name']].append(
-                {'Handle': df_clean[i]['Handle'], 'Retweets': df_clean[i]['Retweets'], 'Likes': df_clean[i]['Likes'], 'Content': df_clean[i]['Content']})
+                {'Handle': df_clean[i]['Handle'],
+                 'Image': df_clean[i]['Profile Image'],
+                 'URL': df_clean[i]['Tweet Link'],
+                 'Retweets': df_clean[i]['Retweets'],
+                 'Likes': df_clean[i]['Likes'],
+                 'Content': df_clean[i]['Content']})
 
 with open('data/tweets/raw.json', 'w') as outfile:
     json.dump(data, outfile)

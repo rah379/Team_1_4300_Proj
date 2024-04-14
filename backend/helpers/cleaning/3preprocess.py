@@ -55,7 +55,8 @@ def convert_to_documents(tweets_data):
         full_doc = remove_long_words(full_doc)
         full_doc = remove_numbers(full_doc)  # also removes underscores
         docs.append(full_doc)
-        index_to_politician[i] = [user, data[user][0]['Handle']]
+        index_to_politician[i] = [user, data[user]
+                                  [0]['Handle'], data[user][0]['Image']]
         i += 1
         # break
     return docs, index_to_politician

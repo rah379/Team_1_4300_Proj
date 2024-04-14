@@ -12,7 +12,7 @@ def print_lengths_of_items(json_file):
     print(a)
 
 
-json_file = 'us_list_unfiltered.json'
+# json_file = 'us_list_unfiltered.json'
 
 irrelevant = [
     "Real America's Voice (RAV)",
