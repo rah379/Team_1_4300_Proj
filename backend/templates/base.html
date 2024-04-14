@@ -41,20 +41,6 @@
             document.getElementById("filter-text-val").focus();
         }
 
-        // function filterText() {
-        //     document.getElementById("answer-box").innerHTML = ""
-        //     console.log(document.getElementById("filter-text-val").value)
-        //     console.log("HELLO??")
-        //     fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-        //         .then((response) => response.json())
-        //         .then((data) => data.forEach(row => {
-
-        //             let tempDiv = document.createElement("div")
-        //             tempDiv.innerHTML = answerBoxTemplate(row.title, row.descr, row.imdb_rating)
-        //             document.getElementById("answer-box").appendChild(tempDiv)
-        //         }));
-        // }
-
         function poliSearch() {
             document.getElementById("answer-box").innerHTML = "";
             fetch(
@@ -75,28 +61,7 @@
                         );
                         document.getElementById("answer-box").appendChild(tempDiv);
                     }
-                    // tempDiv.innerHTML = answerBoxTemplate(
-                    //     data["matches"][0],
-                    //     data["similarity"][0],
-                    //     data["handles"][0],
-                    //     "NA - fill in with matched tweets"
-                    // );
-                    // document.getElementById("answer-box").appendChild(tempDiv);
-                    // let tempDiv2 = document.createElement("div");
-                    // tempDiv2.innerHTML = answerBoxTemplate(
-                    //     data["matches"][1],
-                    //     data["similarity"][1],
-                    //     data["handles"][1],
-                    //     "NA - fill in with matched tweets"
-                    // );
-                    // document.getElementById("answer-box").appendChild(tempDiv2);
                 });
-            // .then((data) => data.forEach(row => {
-
-            //     let tempDiv = document.createElement("div")
-            //     tempDiv.innerHTML = answerBoxTemplate(row[0], row[0], row[0])
-            //     document.getElementById("answer-box").appendChild(tempDiv)
-            // }));
         }
     </script>
 </body>
