@@ -51,6 +51,11 @@
             )
                 .then((response) => response.json())
                 .then((data) => {
+                    if (data == null) {
+                        let tempDiv = document.createElement("div");
+                        tempDiv.innerHTML = "<h1>No matches found :( Try refining your search </h1>";
+                        document.getElementById("answer-box").appendChild(tempDiv);
+                    }
                     for (let i = 0; i < data["matches"].length; i++) {
                         let tempDiv = document.createElement("div");
                         tempDiv.innerHTML = answerBoxTemplate(
