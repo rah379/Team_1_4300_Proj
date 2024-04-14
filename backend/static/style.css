@@ -100,8 +100,10 @@
 }
 
 #answer-box {
-  width: 700px;
-  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .episode-title {
@@ -112,11 +114,10 @@
   font-family: "Montserrat", sans-serif;
 }
 
-.result {
-  padding: 40px;
-  display: block;
+sl-card::part(base) {
   border: 2px solid #0056b3;
   font-family: "Montserrat", sans-serif;
   border-radius: 12px;
-  margin-bottom: 36px;
+  background: #d2e5fa;
+  min-width: 700px;
 }
