@@ -25,7 +25,7 @@ dcn = np.load(os.path.join(current_directory, 'data/numpy/dcn.npy'))
 with open(os.path.join(current_directory, 'data/json/index_politicians.json'), 'r') as f:
     itp = json.load(f)
 
-names = np.load(os.path.join(current_directory, 'data/numpy/names.npy'))
+names = np.load(os.path.join(current_directory, 'data/numpy/curr_names.npy'))
 
 ####################
 
