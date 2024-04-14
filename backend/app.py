@@ -10,11 +10,12 @@ os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..", os.curdir))
 
 # Get the directory of the current script
 current_directory = os.path.dirname(os.path.abspath(__file__))
-print(current_directory)
+# print(current_directory)
+
+# loading data
 # Specify the path to the JSON file relative to the current script
 json_file_path = os.path.join(current_directory, 'data/json/docs.json')
 
-# Assuming your JSON data is stored in a file named 'init.json'
 with open(json_file_path, 'r') as file:
     docs = json.load(file)
 
@@ -23,6 +24,10 @@ wcnt = np.load(
 dcn = np.load(os.path.join(current_directory, 'data/numpy/dcn.npy'))
 with open(os.path.join(current_directory, 'data/json/index_politicians.json'), 'r') as f:
     itp = json.load(f)
+
+names = np.load(os.path.join(current_directory, 'data/numpy/names.npy'))
+
+####################
 
 app = Flask(__name__)
 CORS(app)

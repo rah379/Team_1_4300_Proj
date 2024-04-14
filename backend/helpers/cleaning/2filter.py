@@ -122,4 +122,5 @@ def combine_aliased_keys(json_file, output, alias_map):
         json.dump(json_data, f, indent=4)
 
 
-combine_aliased_keys('raw.json', 'clean.json', duplicates)
+combine_aliased_keys('data/tweets/raw.json',
+                     'data/tweets/clean2.json', duplicates)

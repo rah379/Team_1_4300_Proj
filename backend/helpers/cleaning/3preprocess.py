@@ -55,7 +55,7 @@ def convert_to_documents(tweets_data):
         full_doc = remove_long_words(full_doc)
         full_doc = remove_numbers(full_doc)  # also removes underscores
         docs.append(full_doc)
-        index_to_politician[i] = user
+        index_to_politician[i] = [user, data[user][0]['Handle']]
         i += 1
         # break
     return docs, index_to_politician
@@ -90,17 +90,17 @@ def save_as_json(data, filename):
         json.dump(data, f)
 
 
-# testing
+# saving files
 docs, itp = convert_to_documents('data/tweets/clean.json')
-# save_as_json(itp, 'data/index_politicians.json')
+save_as_json(itp, 'data/index_politicians.json')
 save_as_json(docs, 'data/json/docs.json')
 
 
 X, vectorizer = create_tfidf_matrix(docs)
 vocab = vectorizer.vocabulary_
-# save_as_json(vocab, 'data/vocab.json')
+save_as_json(vocab, 'data/vocab.json')
 index_to_word = {i: t for t, i in vocab.items()}
-# save_as_json(index_to_word, 'data/index_words.json')
+save_as_json(index_to_word, 'data/index_words.json')
 # vocab and index_words are inverses
 
 # SVD (K = 40)

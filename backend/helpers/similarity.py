@@ -3,11 +3,8 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 import numpy as np
+import pandas as pd
 
-
-def load_data():
-    """load the data from the json and numpy file"""
-    pass
 
 # def closest_words(word_in, words_representation_in, k=10):
 #     if word_in not in vocab:
@@ -64,12 +61,10 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         np.dot(query_tfidf, words_compressed_normed_transpose)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
     asort = np.argsort(-sims)[:k+1]
-    # print([itp[str(i)] for i in asort[1:]])
-    # print([i for i in asort[1:]])
-    # print([sims[i] for i in asort[1:]])
     record = {
         "index": [int(i) for i in asort[1:]],
-        "matches": [itp[str(i)] for i in asort[1:]],
+        "matches": [itp[str(i)][0] for i in asort[1:]],
+        "handles": [itp[str(i)][1] for i in asort[1:]],
         "similarity": [sims[i] for i in asort[1:]]
     }
     return record
@@ -87,7 +82,8 @@ def autocorrect(query, keywords, max_dist=2):
 
     query: string
     keywords: list of words/tokens (including key topics and politician names)"""
-    pass
+    return query
+    # pass
 
 
 def boolean_search(query, names):
@@ -99,7 +95,6 @@ def boolean_search(query, names):
     names: list of politician names """
 
     query = autocorrect(query, names)
-    pass
 
 
 def svd_transform(doc_matrix):

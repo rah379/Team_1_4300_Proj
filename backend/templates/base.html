@@ -26,10 +26,11 @@
 
     <script>
 
-        function answerBoxTemplate(title, titleDesc, rating) {
+        function answerBoxTemplate(title, titleDesc, account, rating) {
             return `<div class=''>
                 <h3 class='episode-title'>${title}</h3>
                 <p class='episode-desc'>Similarity Score: ${titleDesc}</p>
+                <p class='episode-rating'>Twitter Account: ${account}</p>
                 <p class='episode-rating'>Matched Tweets: ${rating}</p>
             </div>`
         }
@@ -38,19 +39,19 @@
             document.getElementById('filter-text-val').focus()
         }
 
-        function filterText() {
-            document.getElementById("answer-box").innerHTML = ""
-            console.log(document.getElementById("filter-text-val").value)
-            console.log("HELLO??")
-            fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-                .then((response) => response.json())
-                .then((data) => data.forEach(row => {
+        // function filterText() {
+        //     document.getElementById("answer-box").innerHTML = ""
+        //     console.log(document.getElementById("filter-text-val").value)
+        //     console.log("HELLO??")
+        //     fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
+        //         .then((response) => response.json())
+        //         .then((data) => data.forEach(row => {
 
-                    let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(row.title, row.descr, row.imdb_rating)
-                    document.getElementById("answer-box").appendChild(tempDiv)
-                }));
-        }
+        //             let tempDiv = document.createElement("div")
+        //             tempDiv.innerHTML = answerBoxTemplate(row.title, row.descr, row.imdb_rating)
+        //             document.getElementById("answer-box").appendChild(tempDiv)
+        //         }));
+        // }
 
         function poliSearch() {
             document.getElementById("answer-box").innerHTML = ""
@@ -59,10 +60,10 @@
                 .then((data) => {
                     console.log(data)
                     let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(data["matches"][0], data["similarity"][0], "N/A")
+                    tempDiv.innerHTML = answerBoxTemplate(data["matches"][0], data["similarity"][0], data["handles"][0], "NA - fill in with matched tweets")
                     document.getElementById("answer-box").appendChild(tempDiv)
                     let tempDiv2 = document.createElement("div")
-                    tempDiv2.innerHTML = answerBoxTemplate(data["matches"][1], data["similarity"][1], "HERE")
+                    tempDiv2.innerHTML = answerBoxTemplate(data["matches"][1], data["similarity"][1], data["handles"][1], "NA - fill in with matched tweets")
                     document.getElementById("answer-box").appendChild(tempDiv2)
                 });
             // .then((data) => data.forEach(row => {
