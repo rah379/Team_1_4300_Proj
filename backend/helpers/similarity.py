@@ -23,7 +23,8 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         "handles": [itp[str(i)][1] for i in asort[1:]],
         "similarity": [sims[i] for i in asort[1:]]
     }
-    return remove_zeros(record)
+    # return remove_zeros(record)
+    return record
 
 
 def remove_zeros(results):
