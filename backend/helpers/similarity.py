@@ -17,6 +17,11 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         np.dot(query_tfidf, words_compressed_normed_transpose)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
     asort = np.argsort(-sims)[:k+1]
+    # we only want similarity scores that are greater than 0
+    asort = [item for item in asort if sims[item] > 0]
+
+    if len(asort) == 0:
+        return None
     record = {
         "index": [int(i) for i in asort[1:]],
         "matches": [itp[str(i)][0] for i in asort[1:]],
@@ -24,21 +29,7 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         "profile_images": [itp[str(i)][2] for i in asort[1:]],
         "similarity": [sims[i] for i in asort[1:]]
     }
-    # return remove_zeros(record)
     return record
-
-
-# NOT FUNCTIONAL
-def remove_zeros(results):
-    """removes zero similarity results from the results"""
-    for i in range(len(results['similarity'])):
-        if results['similarity'][i] == 0:
-            results['similarity'].pop(i)
-            results['index'].pop(i)
-            results['matches'].pop(i)
-            results['handles'].pop(i)
-    # add logic for if all zeros
-    return results
 
 
 def autocorrect(query, keywords, max_dist=2):
@@ -52,13 +43,14 @@ def autocorrect(query, keywords, max_dist=2):
     # pass
 
 
-def boolean_search(query, itp):
+def boolean_search(query, itp, thresh=0.5):
     """does boolean search on the query with the politician name
     this is helpful if we're just searching up an individual politician
     might be helpful to run levenshtein distance first to standardize
 
     query: string
-    itp: index to politicians dictionary (can convert into names list)"""
+    itp: index to politicians dictionary (can convert into names list)
+    thresh: how similar things have to be to be considered a match"""
     ret = []
     curr_names = [itp[key][0] for key in itp.keys()]
     query = autocorrect(query, curr_names)
@@ -70,7 +62,7 @@ def boolean_search(query, itp):
         intersection = [value for value in qwords if value in cwords]
         # print(len(intersection))
         # if (len(intersection) / len(cwords) > 0):
-        if (len(intersection) / len(cwords) > 0.5) and (len(intersection) / len(qwords) > 0.5):
+        if (len(intersection) / len(cwords) > thresh) and (len(intersection) / len(qwords) > thresh):
             # we want good matches
             ret.append((i, curr_name, len(intersection) / len(cwords)))
     ret = sorted(ret, key=lambda x: x[2], reverse=True)
