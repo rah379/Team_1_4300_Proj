@@ -5,18 +5,22 @@ from sklearn.preprocessing import normalize
 import numpy as np
 import pandas as pd
 import json
+from cleaning.utils import remove_long_words, remove_numbers
+from scipy.sparse.linalg import svds
 
 
-# svd cossine sim for top 10
-def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.7, min_df=3):
+def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.7, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
                                  min_df=min_df)
+    """
+    SVD similarity based matching
+    """
     vectorizer.fit_transform(docs)
     query_tfidf = vectorizer.transform([query]).toarray()
     query_vec = normalize(
         np.dot(query_tfidf, words_compressed_normed_transpose)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
-    asort = np.argsort(-sims)[:k+1]
+    asort = np.argsort(-sims)[:k]
     # we only want similarity scores that are greater than 0
     asort = [item for item in asort if sims[item] > 0]
 
@@ -27,11 +31,13 @@ def svd_cos(query, docs, words_compressed_normed_transpose, docs_compressed_norm
         "matches": [itp[str(i)][0] for i in asort[1:]],
         "handles": [itp[str(i)][1] for i in asort[1:]],
         "profile_images": [itp[str(i)][2] for i in asort[1:]],
-        "similarity": [sims[i] for i in asort[1:]]
+        "similarity": [sims[i] for i in asort[1:]],
+        "top tweets": [find_key_tweets(query, tweets, itp[str(i)][0]) for i in asort[1:]]
     }
     return record
 
 
+# NOT IMPLEMENTED YET
 def autocorrect(query, keywords, max_dist=2):
     """uses levenshtein edit distance to match query to words in a given list of words
     basically checking if mistakes were made and then correcting that
@@ -60,8 +66,6 @@ def boolean_search(query, itp, thresh=0.5):
         curr_name = curr_names[i]
         cwords = curr_name.lower().split()
         intersection = [value for value in qwords if value in cwords]
-        # print(len(intersection))
-        # if (len(intersection) / len(cwords) > 0):
         if (len(intersection) / len(cwords) > thresh) and (len(intersection) / len(qwords) > thresh):
             # we want good matches
             ret.append((i, curr_name, len(intersection) / len(cwords)))
@@ -78,17 +82,58 @@ def boolean_search(query, itp, thresh=0.5):
     return record
 
 
+# testing
 # with open('data/json/index_politicians.json', 'r') as f:
 #     itp = json.load(f)
 # print(boolean_search("catherine cortez masto", itp))
 
 
-def find_key_tweets(query, user_tweets):
+def find_key_tweets(query, data, name, k=3, max_df=0.7):
     """given a query, find tweets that best match 
-    most likely using bool ean search?
+    using svd to determine similarity
 
     query: string
-    user tweets: a list of strings OR list of array of tokens (probably based on user)
-
-
+    data: dataset of tweets for all users
+    name: name of the politician
+    k: numbero of tweets to return (default 3)
+    max_df: max document frequency for the tfidf vectorizer (default 0.7)
     """
+
+    top_tweets = []
+    # should contain tuples of (content, likes, retweets, and url)
+
+    relevant = data[name]
+    tweets = [tweet['Content'] for tweet in relevant]
+    ctweets = [remove_long_words(tweet) for tweet in tweets]
+    ctweets = [remove_numbers(tweet) for tweet in ctweets]
+
+    vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df)
+
+    X = vectorizer.fit_transform(ctweets)
+    dc, _, wc = svds(X, k=40)
+    wcnt = normalize(wc, axis=1).transpose()
+    dcn = normalize(dc)
+    query_tfidf = vectorizer.transform([query]).toarray()
+    query_vec = normalize(
+        np.dot(query_tfidf, wcnt)).squeeze()
+    sims = dcn.dot(query_vec)
+    asort = np.argsort(-sims)[:k]
+    # we only want similarity scores that are greater than 0
+    asort = [item for item in asort if sims[item] > 0]
+    if (len(asort) == 0):
+        # weird... no matches (but technically possible)
+        return top_tweets
+
+    for ind in asort:
+        top_tweets.append({"Content": tweets[ind],
+                           "Likes": relevant[ind]['Likes'],
+                          "Retweets": relevant[ind]['Retweets'],
+                           "URL": relevant[ind]['URL']})
+    # print(top_tweets)
+    return top_tweets
+
+
+# with open('data/tweets/clean.json', 'r') as file:
+#     data = json.load(file)
+
+# find_key_tweets("trump", data, "Lee Zeldin")
