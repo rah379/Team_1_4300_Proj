@@ -55,7 +55,7 @@ def episodes_search():
         record = svd_cos(text, docs, tweets, wcnt, dcn, itp)
     if record is None:
         record = boolean_search(text, itp, tweets, thresh=0)
-    print(record)
+    # print(record)
     return json.dumps(record)
 
 

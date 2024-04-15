@@ -31,11 +31,12 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         "matches": [itp[str(i)][0] for i in asort[1:]],
         "handles": [itp[str(i)][1] for i in asort[1:]],
         "profile_images": [itp[str(i)][2] for i in asort[1:]],
-        "similarity": [sims[i] for i in asort[1:]],
-        "popularity score": [get_popularity(tweets, itp[str(i)][0], 1, 1) for i in asort[1:]],
+        "similarity": [round(sims[i], 4) for i in asort[1:]],
+        "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 4) for i in asort[1:]],
         "top tweets": [find_key_tweets(query, tweets, itp[str(i)][0]) for i in asort[1:]]
     }
     return record
+
 
 def get_popularity(data, name, weight_likes, weight_rt):
     relevant = data[name]
@@ -57,7 +58,6 @@ def get_popularity(data, name, weight_likes, weight_rt):
     avg_like_score /= len(relevant)
     avg_retweet_score /= len(relevant)
     return avg_like_score + avg_retweet_score
-
 
 
 # NOT IMPLEMENTED YET
@@ -100,8 +100,9 @@ def boolean_search(query, itp, tweets, thresh=0.5):
             "matches": [ele[1] for ele in ret],
             "handles": [itp[str(ele[0])][1] for ele in ret],
             "profile_images": [itp[str(ele[0])][2] for ele in ret],
-            "similarity": [ele[2] for ele in ret],
-            "top tweets": [find_key_tweets(query, tweets, ele[1]) for ele in ret]
+            "similarity": [round(ele[2], 4) for ele in ret],
+            "top tweets": [find_key_tweets(query, tweets, ele[1]) for ele in ret],
+            "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 4) for i in asort[1:]]
         }
     return record
 

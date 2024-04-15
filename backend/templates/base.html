@@ -3,42 +3,26 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-  rel="stylesheet"
-/>
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css"
-/>
-<script
-  type="module"
-  src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"
-></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+  rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
+<script type="module"
+  src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
 
 <body>
   <div class="full-body-container">
     <div class="top-text">
-      <img
-        src="{{ url_for('static', filename='images/logo.png') }}"
-        style="width: 75%"
-      />
+      <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%" />
       <div class="input-box" onclick="sendFocus()">
         <img src="{{ url_for('static', filename='images/mag.png') }}" />
-        <input
-          placeholder="Search for a Politician (based on political view)"
-          id="filter-text-val"
-        />
+        <input placeholder="Search for a Politician (based on political view)" id="filter-text-val" />
       </div>
     </div>
     <div class="button-search">
       <button type="button" class="btn" onclick="poliSearch();">Search</button>
     </div>
 
-    <sl-spinner
-      id="loading"
-      style="font-size: 50px; --track-width: 10px"
-    ></sl-spinner>
+    <sl-spinner id="loading" style="font-size: 50px; --track-width: 10px"></sl-spinner>
 
     <div id="answer-box"></div>
   </div>
@@ -53,10 +37,11 @@
         return "Somewhat Common Point";
       } else return "Not an Important Part of their Twitter";
     }
-    function answerBoxTemplate(title, titleDesc, account, rating, pop) {
+    function answerBoxTemplate(title, similarity, titleDesc, account, rating, pop) {
       return `<sl-card class='result'>
                 <div slot="header">
                 <h3 class='episode-title'>${title}</h3>
+                <p class='episode-title'>Similarity Score: ${similarity}</p>
                 </div>
 
                 <p class='episode-desc'>Amount of Discussion On Their Twitter: ${titleDesc}</p>
@@ -76,9 +61,9 @@
 
       fetch(
         "/episodes?" +
-          new URLSearchParams({
-            title: document.getElementById("filter-text-val").value,
-          }).toString()
+        new URLSearchParams({
+          title: document.getElementById("filter-text-val").value,
+        }).toString()
       )
         .then((response) => response.json())
         .then((data) => {
@@ -97,6 +82,7 @@
             }
             tempDiv.innerHTML = answerBoxTemplate(
               data["matches"][i],
+              data["similarity"][i],
               match_similarity(data["similarity"][i]),
               data["handles"][i],
               topTweets,
