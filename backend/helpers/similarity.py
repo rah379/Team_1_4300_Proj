@@ -5,7 +5,7 @@ from sklearn.preprocessing import normalize
 import numpy as np
 import pandas as pd
 import json
-from cleaning.utils import remove_long_words, remove_numbers
+from helpers.cleaning.utils import remove_long_words, remove_numbers
 from scipy.sparse.linalg import svds
 
 
@@ -110,7 +110,7 @@ def find_key_tweets(query, data, name, k=3, max_df=0.7):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df)
 
     X = vectorizer.fit_transform(ctweets)
-    dc, _, wc = svds(X, k=40)
+    dc, _, wc = svds(X, k=10)
     wcnt = normalize(wc, axis=1).transpose()
     dcn = normalize(dc)
     query_tfidf = vectorizer.transform([query]).toarray()
@@ -136,4 +136,4 @@ def find_key_tweets(query, data, name, k=3, max_df=0.7):
 # with open('data/tweets/clean.json', 'r') as file:
 #     data = json.load(file)
 
-# find_key_tweets("trump", data, "Lee Zeldin")
+# find_key_tweets("vote for trump!", data, "Lee Zeldin")
