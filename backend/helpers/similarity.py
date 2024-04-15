@@ -89,7 +89,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
 # print(boolean_search("catherine cortez masto", itp))
 
 
-def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=20):
+def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=10):
     """given a query, find tweets that best match 
     using svd to determine similarity
 
