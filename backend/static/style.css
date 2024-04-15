@@ -121,3 +121,64 @@ sl-card::part(base) {
   background: #d2e5fa;
   min-width: 700px;
 }
+
+.card {
+  font-family: Arial, sans-serif;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  min-width: 700px;
+  margin: 20px;
+  padding: 10px;
+  background: #ffffff;
+}
+.header {
+  cursor: pointer;
+  color: #2a5db0;
+  font-size: 18px;
+  user-select: none;
+}
+.info {
+  color: #555;
+  font-size: 14px;
+  margin-top: 5px;
+}
+.info a {
+  color: #2a5db0;
+  text-decoration: none;
+}
+.info a:hover {
+  text-decoration: underline;
+}
+.twitter-img {
+  vertical-align: middle;
+  width: 32px; /* or any other size */
+  height: 32px;
+  border-radius: 50%; /* makes the image circular */
+  margin-right: 8px;
+}
+.flag {
+  display: inline-block;
+  width: 24px; /* Width of the flag */
+  height: 16px; /* Height of the flag */
+  background-size: cover;
+  vertical-align: middle;
+  margin-right: 11px;
+  margin-left: 4px;
+}
+.gov-icon {
+  display: inline-block;
+  width: 24px; 
+  height: 24px; 
+  background-size: cover;
+  vertical-align: middle;
+  margin-right: 6px;
+  margin-left: 9px;
+}
+.dropdown-content {
+  display: none;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+.dropdown-content.show-more {
+  display: block;
+}
