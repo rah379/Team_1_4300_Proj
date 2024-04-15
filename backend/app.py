@@ -50,11 +50,12 @@ def home():
 def episodes_search():
     text = request.args.get("title")
     # print(svd_cos(text, docs, wcnt, dcn, itp))
-    record = boolean_search(text, itp)
+    record = boolean_search(text, itp, tweets)
     if record is None:
         record = svd_cos(text, docs, tweets, wcnt, dcn, itp)
     if record is None:
-        record = boolean_search(text, itp, thresh=0)
+        record = boolean_search(text, itp, tweets, thresh=0)
+    print(record)
     return json.dumps(record)
 
 

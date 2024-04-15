@@ -49,7 +49,7 @@ def autocorrect(query, keywords, max_dist=2):
     # pass
 
 
-def boolean_search(query, itp, thresh=0.5):
+def boolean_search(query, itp, tweets, thresh=0.5):
     """does boolean search on the query with the politician name
     this is helpful if we're just searching up an individual politician
     might be helpful to run levenshtein distance first to standardize
@@ -77,7 +77,8 @@ def boolean_search(query, itp, thresh=0.5):
             "matches": [ele[1] for ele in ret],
             "handles": [itp[str(ele[0])][1] for ele in ret],
             "profile_images": [itp[str(ele[0])][2] for ele in ret],
-            "similarity": [ele[2] for ele in ret]
+            "similarity": [ele[2] for ele in ret],
+            "top tweets": [find_key_tweets(query, tweets, ele[1]) for ele in ret]
         }
     return record
 
@@ -88,7 +89,7 @@ def boolean_search(query, itp, thresh=0.5):
 # print(boolean_search("catherine cortez masto", itp))
 
 
-def find_key_tweets(query, data, name, k=3, max_df=0.7):
+def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=20):
     """given a query, find tweets that best match 
     using svd to determine similarity
 
@@ -110,7 +111,7 @@ def find_key_tweets(query, data, name, k=3, max_df=0.7):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df)
 
     X = vectorizer.fit_transform(ctweets)
-    dc, _, wc = svds(X, k=10)
+    dc, _, wc = svds(X, k=svdSize)
     wcnt = normalize(wc, axis=1).transpose()
     dcn = normalize(dc)
     query_tfidf = vectorizer.transform([query]).toarray()

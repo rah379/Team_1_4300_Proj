@@ -58,11 +58,15 @@
                     }
                     for (let i = 0; i < data["matches"].length; i++) {
                         let tempDiv = document.createElement("div");
+                        let topTweets = "No relevant tweets found :(";
+                        if (data["top tweets"][i].length > 0) {
+                            topTweets = data["top tweets"][i][0]["Content"];
+                        }
                         tempDiv.innerHTML = answerBoxTemplate(
                             data["matches"][i],
                             data["similarity"][i],
                             data["handles"][i],
-                            data["top tweets"][i][0]["Content"],
+                            topTweets,
                         );
                         document.getElementById("answer-box").appendChild(tempDiv);
                     }
