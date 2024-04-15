@@ -119,5 +119,5 @@ sl-card::part(base) {
   font-family: "Montserrat", sans-serif;
   border-radius: 12px;
   background: #d2e5fa;
-  min-width: 700px;
+  width: 700px;
 }
