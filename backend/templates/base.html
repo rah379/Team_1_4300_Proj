@@ -23,17 +23,29 @@
         </div>
         <div id="answer-box"></div>
     </div>
-
     <script>
-        function answerBoxTemplate(title, titleDesc, account, rating) {
+        function match_similarity(sim_in) {
+            //still testing a few bounds- >.30 seems to generally be very good,
+            //
+            if (sim_in > .30) {
+                return "Very Common Point";
+            }
+            if (sim_in > .25) {
+                return "Somewhat Common Point"
+
+            }
+            else return "Not an Important Part of their Twitter"
+        }
+        function answerBoxTemplate(title, titleDesc, account, rating, pop) {
             return `<sl-card class='result'>
                 <div slot="header">
                 <h3 class='episode-title'>${title}</h3>
                 </div>
 
-                <p class='episode-desc'>Similarity Score: ${titleDesc}</p>
+                <p class='episode-desc'>Amount of Discussion On Their Twitter: ${titleDesc}</p>
                 <p class='episode-rating'>Twitter Account: <a href= https://twitter.com/${account}>${account}</a></p>
                 <p class='episode-rating'>Matched Tweets: ${rating}</p>
+                <p class = 'episode-rating'>Popularity Score: ${pop}</p>
             </sl-card>`;
         }
 
@@ -64,9 +76,10 @@
                         }
                         tempDiv.innerHTML = answerBoxTemplate(
                             data["matches"][i],
-                            data["similarity"][i],
+                            match_similarity(data["similarity"][i]),
                             data["handles"][i],
                             topTweets,
+                            data["popularity score"][i]
                         );
                         document.getElementById("answer-box").appendChild(tempDiv);
                     }

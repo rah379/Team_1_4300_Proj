@@ -32,9 +32,32 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         "handles": [itp[str(i)][1] for i in asort[1:]],
         "profile_images": [itp[str(i)][2] for i in asort[1:]],
         "similarity": [sims[i] for i in asort[1:]],
+        "popularity score": [get_popularity(tweets, itp[str(i)][0], 1, 1) for i in asort[1:]],
         "top tweets": [find_key_tweets(query, tweets, itp[str(i)][0]) for i in asort[1:]]
     }
     return record
+
+def get_popularity(data, name, weight_likes, weight_rt):
+    relevant = data[name]
+    avg_like_score = 0.
+    avg_retweet_score = 0.
+    for i in relevant:
+        likes = i['Likes']
+        retweets = i['Retweets']
+        if likes[len(likes) - 1] == 'K':
+            likes = (float)(likes[:len(likes) - 1]) * 1000
+        else:
+            likes = (float)(likes[:len(likes)])
+        if retweets[len(retweets) - 1] == 'K':
+            retweets = (float)(retweets[:len(retweets) - 1]) * 1000
+        else:
+            retweets = (float)(retweets[:len(retweets)])
+        avg_like_score += weight_likes * likes
+        avg_retweet_score += weight_rt * retweets
+    avg_like_score /= len(relevant)
+    avg_retweet_score /= len(relevant)
+    return avg_like_score + avg_retweet_score
+
 
 
 # NOT IMPLEMENTED YET
