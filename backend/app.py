@@ -25,6 +25,10 @@ dcn = np.load(os.path.join(current_directory, 'data/numpy/dcn.npy'))
 with open(os.path.join(current_directory, 'data/json/index_politicians.json'), 'r') as f:
     itp = json.load(f)
 
+with open(os.path.join(current_directory, 'data/tweets/clean.json'), 'r') as f:
+    tweets = json.load(f)
+
+
 # names = np.load(os.path.join(current_directory, 'data/numpy/curr_names.npy'))
 
 ####################
@@ -48,7 +52,7 @@ def episodes_search():
     # print(svd_cos(text, docs, wcnt, dcn, itp))
     record = boolean_search(text, itp)
     if record is None:
-        record = svd_cos(text, docs, wcnt, dcn, itp)
+        record = svd_cos(text, docs, tweets, wcnt, dcn, itp)
     if record is None:
         record = boolean_search(text, itp, thresh=0)
     return json.dumps(record)
