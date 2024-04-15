@@ -47,7 +47,7 @@
                 <p class='episode-desc'>Amount of Discussion On Their Twitter: ${titleDesc}</p>
                 <p class='episode-rating'>Twitter Account: <a href= https://twitter.com/${account}>${account}</a></p>
                 <p class='episode-rating'>Matched Tweets: ${rating}</p>
-                <p class = 'episode-rating'>Popularity Score: ${pop}</p>
+                <p class = 'episode-rating'>Popularity of Individual: ${pop}</p>
             </sl-card>`;
     }
 
@@ -76,7 +76,7 @@
           }
           for (let i = 0; i < data["matches"].length; i++) {
             let tempDiv = document.createElement("div");
-            let topTweets = "No relevant tweets found :(";
+            let topTweets = "No specific relevant tweets found :(";
             if (data["top tweets"][i].length > 0) {
               topTweets = data["top tweets"][i][0]["Content"];
             }
@@ -85,7 +85,7 @@
               data["similarity"][i],
               match_similarity(data["similarity"][i]),
               data["handles"][i],
-              topTweets,
+              topTweets, //maybe we should set a default?
               data["popularity score"][i]
             );
             document.getElementById("answer-box").appendChild(tempDiv);
