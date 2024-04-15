@@ -121,3 +121,7 @@ sl-card::part(base) {
   background: #d2e5fa;
   width: 700px;
 }
+
+#loading {
+  display: none;
+}

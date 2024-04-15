@@ -3,74 +3,108 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-    rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
-<script type="module"
-    src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+<link
+  href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css"
+/>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"
+></script>
 
 <body>
-    <div class="full-body-container">
-        <div class="top-text">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%" />
-            <div class="input-box" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for a Politician (based on political view)" id="filter-text-val" />
-            </div>
-        </div>
-        <div class="button-search">
-            <button type="button" class="btn" onclick="poliSearch();">Search</button>
-        </div>
-        <div id="answer-box"></div>
+  <div class="full-body-container">
+    <div class="top-text">
+      <img
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        style="width: 75%"
+      />
+      <div class="input-box" onclick="sendFocus()">
+        <img src="{{ url_for('static', filename='images/mag.png') }}" />
+        <input
+          placeholder="Search for a Politician (based on political view)"
+          id="filter-text-val"
+        />
+      </div>
+    </div>
+    <div class="button-search">
+      <button type="button" class="btn" onclick="poliSearch();">Search</button>
     </div>
 
-    <script>
-        function answerBoxTemplate(title, titleDesc, account, rating) {
-            return `<sl-card class='result'>
+    <sl-spinner
+      id="loading"
+      style="font-size: 50px; --track-width: 10px"
+    ></sl-spinner>
+
+    <div id="answer-box"></div>
+  </div>
+  <script>
+    function match_similarity(sim_in) {
+      //still testing a few bounds- >.30 seems to generally be very good,
+      //
+      if (sim_in > 0.3) {
+        return "Very Common Point";
+      }
+      if (sim_in > 0.25) {
+        return "Somewhat Common Point";
+      } else return "Not an Important Part of their Twitter";
+    }
+    function answerBoxTemplate(title, titleDesc, account, rating, pop) {
+      return `<sl-card class='result'>
                 <div slot="header">
                 <h3 class='episode-title'>${title}</h3>
                 </div>
 
-                <p class='episode-desc'>Similarity Score: ${titleDesc}</p>
+                <p class='episode-desc'>Amount of Discussion On Their Twitter: ${titleDesc}</p>
                 <p class='episode-rating'>Twitter Account: <a href= https://twitter.com/${account}>${account}</a></p>
                 <p class='episode-rating'>Matched Tweets: ${rating}</p>
+                <p class = 'episode-rating'>Popularity Score: ${pop}</p>
             </sl-card>`;
-        }
+    }
 
-        function sendFocus() {
-            document.getElementById("filter-text-val").focus();
-        }
+    function sendFocus() {
+      document.getElementById("filter-text-val").focus();
+    }
 
-        function poliSearch() {
-            document.getElementById("answer-box").innerHTML = "";
-            fetch(
-                "/episodes?" +
-                new URLSearchParams({
-                    title: document.getElementById("filter-text-val").value,
-                }).toString()
-            )
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data == null) {
-                        let tempDiv = document.createElement("div");
-                        tempDiv.innerHTML = "<h1>No matches found :( Try refining your search </h1>";
-                        document.getElementById("answer-box").appendChild(tempDiv);
-                    }
-                    for (let i = 0; i < data["matches"].length; i++) {
-                        let tempDiv = document.createElement("div");
-                        let topTweets = "No relevant tweets found :(";
-                        if (data["top tweets"][i].length > 0) {
-                            topTweets = data["top tweets"][i][0]["Content"];
-                        }
-                        tempDiv.innerHTML = answerBoxTemplate(
-                            data["matches"][i],
-                            data["similarity"][i],
-                            data["handles"][i],
-                            topTweets,
-                        );
-                        document.getElementById("answer-box").appendChild(tempDiv);
-                    }
-                });
-        }
-    </script>
+    function poliSearch() {
+      document.getElementById("answer-box").innerHTML = "";
+      document.getElementById("loading").style.display = "block";
+
+      fetch(
+        "/episodes?" +
+          new URLSearchParams({
+            title: document.getElementById("filter-text-val").value,
+          }).toString()
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("loading").style.display = "none";
+          if (data == null) {
+            let tempDiv = document.createElement("div");
+            tempDiv.innerHTML =
+              "<h1>No matches found :( Try refining your search </h1>";
+            document.getElementById("answer-box").appendChild(tempDiv);
+          }
+          for (let i = 0; i < data["matches"].length; i++) {
+            let tempDiv = document.createElement("div");
+            let topTweets = "No relevant tweets found :(";
+            if (data["top tweets"][i].length > 0) {
+              topTweets = data["top tweets"][i][0]["Content"];
+            }
+            tempDiv.innerHTML = answerBoxTemplate(
+              data["matches"][i],
+              match_similarity(data["similarity"][i]),
+              data["handles"][i],
+              topTweets,
+              data["popularity score"][i]
+            );
+            document.getElementById("answer-box").appendChild(tempDiv);
+          }
+        });
+    }
+  </script>
 </body>
