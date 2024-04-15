@@ -47,10 +47,14 @@ def get_popularity(data, name, weight_likes, weight_rt):
         retweets = i['Retweets']
         if likes[len(likes) - 1] == 'K':
             likes = (float)(likes[:len(likes) - 1]) * 1000
+        elif likes[len(likes) - 1] == 'M':
+            likes = (float)(likes[:len(likes) - 1]) * 1000000
         else:
             likes = (float)(likes[:len(likes)])
         if retweets[len(retweets) - 1] == 'K':
             retweets = (float)(retweets[:len(retweets) - 1]) * 1000
+        elif retweets[len(retweets) - 1] == 'M':
+            retweets = (float)(retweets[:len(retweets) - 1]) * 1000000
         else:
             retweets = (float)(retweets[:len(retweets)])
         avg_like_score += weight_likes * likes
@@ -102,7 +106,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
             "profile_images": [itp[str(ele[0])][2] for ele in ret],
             "similarity": [round(ele[2], 4) for ele in ret],
             "top tweets": [find_key_tweets(query, tweets, ele[1]) for ele in ret],
-            "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 4) for i in asort[1:]]
+            "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 4) for ele in ret]
         }
     return record
 
@@ -113,7 +117,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
 # print(boolean_search("catherine cortez masto", itp))
 
 
-def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=10):
+def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=20):
     """given a query, find tweets that best match 
     using svd to determine similarity
 
@@ -135,7 +139,8 @@ def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=10):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df)
 
     X = vectorizer.fit_transform(ctweets)
-    dc, _, wc = svds(X, k=svdSize)
+    # print(X.shape[0])
+    dc, _, wc = svds(X, k=min(svdSize, X.shape[0] - 1))
     wcnt = normalize(wc, axis=1).transpose()
     dcn = normalize(dc)
     query_tfidf = vectorizer.transform([query]).toarray()
@@ -147,7 +152,12 @@ def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=10):
     asort = [item for item in asort if sims[item] > 0]
     if (len(asort) == 0):
         # weird... no matches (but technically possible)
-        return top_tweets
+        # defaulting based on first version
+        pass
+        # top_tweets.append({"Content": tweets[0],
+        #                    "Likes": relevant[0]['Likes'],
+        #                    "Retweets": relevant[0]['Retweets'],
+        #                    "URL": relevant[0]['URL']})
 
     for ind in asort:
         top_tweets.append({"Content": tweets[ind],
