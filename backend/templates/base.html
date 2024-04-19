@@ -6,27 +6,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-  rel="stylesheet" />
+    rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
 <script type="module"
-  src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+    src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
 
 <body>
-  <div class="full-body-container">
-    <div class="top-text">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%" />
-      <div class="input-box" onclick="sendFocus()">
-        <img src="{{ url_for('static', filename='images/mag.png') }}" />
-        <input placeholder="Search for a Politician (based on political view)" id="filter-text-val" />
-      </div>
-    </div>
-    <div class="button-search">
-      <button type="button" class="btn" onclick="poliSearch();">Search</button>
-    </div>
+    <div class="full-body-container">
+        <div class="top-text">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 75%" />
+            <div class="input-box" onclick="sendFocus()">
+                <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                <input placeholder="Search for a Politician (based on political view)" id="filter-text-val" />
+            </div>
+        </div>
+        <div class="button-search">
+            <button type="button" class="btn" onclick="poliSearch();">Search</button>
+        </div>
 
-    <sl-spinner id="loading" style="font-size: 50px; --track-width: 10px"></sl-spinner>
-    <div id="answer-box"></div>
-  </div>
+        <sl-spinner id="loading" style="font-size: 50px; --track-width: 10px"></sl-spinner>
+        <div id="answer-box"></div>
+    </div>
     <script>
         const get_flag_suff = {
             "Not Found": "default",
@@ -278,34 +278,31 @@
             "Zambia": "zm",
             "Zimbabwe": "zw"
         };
-    
+
         function match_similarity(sim_in) {
-          //still testing a few bounds- >.30 seems to generally be very good,
-          //
-          if (sim_in > 0.3) {
-            return "Very Common Point";
-          }
-          if (sim_in > 0.25) {
-            return "Somewhat Common Point";
-          } else return "Not an Important Part of their Twitter";
+            //still testing a few bounds- >.30 seems to generally be very good,
+            //
+            if (sim_in > 0.3) {
+                return "Very Common Point";
+            }
+            if (sim_in > 0.25) {
+                return "Somewhat Common Point";
+            } else return "Not an Important Part of their Twitter";
         }
 
-        function answerBoxTemplate(title, similarity, titleDesc, account, tweets, pop, img, country, chamber, party, region) {
-
+        function answerBoxTemplate(matches, similarity, discussion, account, tweets, pop, img, country, chamber, party, region) {
             const flag_suff = get_flag_suff[country];
 
             return `<div class="card">
                 <div slot="header">
-                <h3 class='episode-title'>${title}</h3>
+                <h3 class='episode-title'>${matches}</h3>
                 <p class='episode-title'>Similarity Score: ${similarity}</p>
                 </div>
                 <p class="info">
                     <img src="${img}" alt="Twitter Avatar" class="twitter-img">
                     Twitter Account: <a href="https://twitter.com/${account}">${account}</a>
                 </p>
-                <p class='episode-desc'>Amount of Discussion On Their Twitter: ${titleDesc}</p>
-                <p class='episode-rating'>Twitter Account: <a href= https://twitter.com/${account}>${account}</a></p>
-                <p class='episode-rating'>Matched Tweets: ${tweets}</p>
+                <p class='episode-desc'>Amount of Discussion On Their Twitter: ${discussion}</p>
                 <p class = 'episode-rating'>Popularity of Individual: ${pop}</p>
                 <div id="dropdown-header" class="header">More Info <i class="fas fa-chevron-down"></i></div>
                     <div class="dropdown-content">
@@ -322,15 +319,16 @@
                             <span class="fa-solid fa-democrat gov-icon"></span> Political Party: ${party}
                         </p>
                     </div>
-                <p class="info">Matched Tweets: ${rating}</p>
+                <p class="info">Matched Tweets: ${tweets}</p>
             </div>`;
         }
 
         function sendFocus() {
-          document.getElementById("filter-text-val").focus();
+            document.getElementById("filter-text-val").focus();
         }
 
         function poliSearch() {
+            console.log("HERE polisearchs")
             document.getElementById("answer-box").innerHTML = "";
             document.getElementById("loading").style.display = "block";
             fetch(
@@ -341,7 +339,6 @@
             )
                 .then((response) => response.json())
                 .then((data) => {
-                    document.getElementById("loading").style.display = "none";
                     if (data == null) {
                         let tempDiv = document.createElement("div");
                         tempDiv.innerHTML = "<h1>No matches found :( Try refining your search </h1>";
@@ -352,14 +349,16 @@
                         let tempDiv = document.createElement("div");
                         let topTweets = "No specific relevant tweets found :(";
                         if (data["top tweets"][i].length > 0) {
-                          topTweets = data["top tweets"][i][0]["Content"];
+                            topTweets = data["top tweets"][i][0]["Content"];
                         }
+                        document.getElementById("loading").style.display = "none";
                         tempDiv.innerHTML = answerBoxTemplate(
                             data["matches"][i],
                             data["similarity"][i],
+                            match_similarity(data["similarity"][i]),
                             data["handles"][i],
                             topTweets,
-                            data["popularity score"][i]
+                            data["popularity score"][i],
                             data["profile_images"][i],
                             data["country"][i],
                             data["chamber"][i],
@@ -367,29 +366,29 @@
                             data["region"][i]
                         );
                         document.getElementById("answer-box").appendChild(tempDiv);
-                        
+
                     }
                 });
         }
 
-    document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('answer-box').addEventListener('click', function (event) {
-        if (event.target.classList.contains('header') || event.target.closest('.header')) {
-            const header = event.target.closest('.header');
-            const content = header.nextElementSibling;
-            content.classList.toggle('show-more');
-            header.innerHTML = content.classList.contains('show-more') ?
-                `Less Info <i class="fas fa-chevron-up" aria-hidden="true"></i>` :
-                `More Info <i class="fas fa-chevron-down" aria-hidden="true"></i>`;
-            }
-        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('answer-box').addEventListener('click', function (event) {
+                if (event.target.classList.contains('header') || event.target.closest('.header')) {
+                    const header = event.target.closest('.header');
+                    const content = header.nextElementSibling;
+                    content.classList.toggle('show-more');
+                    header.innerHTML = content.classList.contains('show-more') ?
+                        `Less Info <i class="fas fa-chevron-up" aria-hidden="true"></i>` :
+                        `More Info <i class="fas fa-chevron-down" aria-hidden="true"></i>`;
+                }
+            });
 
-    document.getElementById('filter-text-val').addEventListener('keydown', function (event) {
-        if (event.key === "Enter") {
-            poliSearch();
-            event.preventDefault();
-        }
-    });
-});
+            document.getElementById('filter-text-val').addEventListener('keydown', function (event) {
+                if (event.key === "Enter") {
+                    poliSearch();
+                    event.preventDefault();
+                }
+            });
+        });
     </script>
 </body>
