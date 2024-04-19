@@ -328,7 +328,6 @@
         }
 
         function poliSearch() {
-            console.log("HERE polisearchs")
             document.getElementById("answer-box").innerHTML = "";
             document.getElementById("loading").style.display = "block";
             fetch(
@@ -344,6 +343,7 @@
                         tempDiv.innerHTML = "<h1>No matches found :( Try refining your search </h1>";
                         document.getElementById("answer-box").appendChild(tempDiv);
                     }
+                    document.getElementById("loading").style.display = "none";
                     console.log(data)
                     for (let i = 0; i < data["matches"].length; i++) {
                         let tempDiv = document.createElement("div");
