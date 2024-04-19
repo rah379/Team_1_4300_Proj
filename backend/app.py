@@ -38,6 +38,10 @@ with open(os.path.join(current_directory, 'data/people.csv'), mode='r', newline=
         l_data.append(filtered_row)
 people_csv = json.dumps(l_data, indent=4)
 
+with open(os.path.join(current_directory, 'data/tweets/clean.json'), 'r') as f:
+    tweets = json.load(f)
+
+
 # names = np.load(os.path.join(current_directory, 'data/numpy/curr_names.npy'))
 
 ####################
@@ -94,12 +98,15 @@ def home():
 def episodes_search():
     text = request.args.get("title")
     # print(svd_cos(text, docs, wcnt, dcn, itp))
-    record = boolean_search(text, itp)
+    record = boolean_search(text, itp, tweets)
     if record is None:
-        record = svd_cos(text, docs, wcnt, dcn, itp)
+        record = svd_cos(text, docs, tweets, wcnt, dcn, itp)
     if record is None:
-        record = boolean_search(text, itp, thresh=0)
-    record = update_json(record)
+        record = boolean_search(text, itp, tweets, thresh=0)
+        
+    if record is not None:
+        record = update_json(record)
+    # print(record)
     return json.dumps(record)
 
 
