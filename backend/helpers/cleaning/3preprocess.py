@@ -19,10 +19,11 @@ def convert_to_documents(tweets_data):
     i = 0
     with open(tweets_data, 'r') as f:
         data = json.load(f)
-
+    total = 0
     for user in data.keys():
         # print(user)
-        tweets = [data[user][i]['Content'] for i in range(len(data[user]))]
+        total += len(data[user])
+        tweets = [data[user][j]['Content'] for j in range(len(data[user]))]
         full_doc = " ".join(tweets)
         full_doc = remove_long_words(full_doc)
         full_doc = remove_numbers(full_doc)  # also removes underscores
@@ -31,6 +32,7 @@ def convert_to_documents(tweets_data):
                                   [0]['Handle'], data[user][0]['Image']]
         i += 1
         # break
+    print(total)
     return docs, index_to_politician
 
 

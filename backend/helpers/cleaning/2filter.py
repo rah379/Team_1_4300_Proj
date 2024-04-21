@@ -167,7 +167,7 @@ duplicates = {
     "Congressman Greg Steube": "Greg Steube",
     "President Biden": "Joe Biden",
     "Former Rep. Tulsi Gabbard": "Tulsi Gabbard",
-    "Team Perdue": "David Perdue",
+    # "Team Perdue": "David Perdue",
     "Inhofe Press Office": "Sen. Jim Inhofe",
     "Congresswoman Ayanna Pressley": "Ayanna Pressley",
     "Attorney General Keith Ellison": "Keith Ellison",
@@ -226,7 +226,7 @@ def remove_keys_with_few_instances(json_file, output, min_instances=10):
         json.dump(data, f, indent=4)
 
 
-remove_keys_with_few_instances(json_file, json_file)
+remove_keys_with_few_instances(json_file, json_file, min_instances=20)
 
 
 def combine_aliased_keys(json_file, output, alias_map):
