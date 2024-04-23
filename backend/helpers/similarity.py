@@ -9,7 +9,7 @@ from helpers.cleaning.utils import remove_long_words, remove_numbers
 from scipy.sparse.linalg import svds
 
 
-def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.7, min_df=3):
+def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.95, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
                                  min_df=min_df)
     """
@@ -117,7 +117,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
 # print(boolean_search("catherine cortez masto", itp))
 
 
-def find_key_tweets(query, data, name, k=3, max_df=0.7, svdSize=20):
+def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20):
     """given a query, find tweets that best match 
     using svd to determine similarity
 

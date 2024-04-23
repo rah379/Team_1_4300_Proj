@@ -36,7 +36,7 @@ def convert_to_documents(tweets_data):
     return docs, index_to_politician
 
 
-def create_tfidf_matrix(docs, max_df=.7, min_df=3):
+def create_tfidf_matrix(docs, max_df=.95, min_df=3):
     """create a tfidf matrix from the list of documents
     this tfidf matrix is in the form of a pandas df"""
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
