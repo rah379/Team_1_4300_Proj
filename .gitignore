@@ -25,3 +25,5 @@ pyvenv.cfg
 
 .idea
 4300_project
+
+backend/data/tweets/scraped.csv
