@@ -14,7 +14,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 # from spacytextblob.spacytextblob import SpacyTextBlob
 
 
-def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=5, max_df=0.95, min_df=3):
+def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.95, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
                                  min_df=min_df)
     """
@@ -29,6 +29,10 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
     # we only want similarity scores that are greater than 0
     asort = [item for item in asort if sims[item] > 0]
 
+    qsentiment = sentimentAnalysis(query)[0]
+    if qsentiment == 0:  # slightly inflating up
+        qsentiment = 0.01
+
     if len(asort) == 0:
         return None
     k_tweets = [find_key_tweets(query, tweets, itp[str(i)][0])
@@ -41,7 +45,7 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         "similarity": [round(sims[i], 4) for i in asort[1:]],
         "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 4) for i in asort[1:]],
         "top tweets": k_tweets,
-        # "average sentiment": [getAvgSentiment(k_tweets[i], sentimentAnalysis) for i in range(len(k_tweets))],
+        "average sentiment": [np.sign(getAvgSentiment(k_tweets[i], sentimentAnalysis)[0]) - np.sign(qsentiment) for i in range(len(k_tweets))],
     }
     return record
 
@@ -96,6 +100,10 @@ def boolean_search(query, itp, tweets, thresh=0.5):
     curr_names = [itp[key][0] for key in itp.keys()]
     query = autocorrect(query, curr_names)
 
+    qsentiment = sentimentAnalysis(query)[0]
+    if qsentiment == 0:  # slightly inflating up
+        qsentiment = 0.01
+
     qwords = query.lower().split()
     for i in range(len(curr_names)):
         curr_name = curr_names[i]
@@ -117,7 +125,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
             "similarity": [round(ele[2], 4) for ele in ret],
             "top tweets": k_tweets,
             "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 4) for ele in ret],
-            "average sentiment": [getAvgSentiment(k_tweets[i], sentimentAnalysis)[0] for i in range(len(k_tweets))],
+            "average sentiment": [0 for i in range(len(k_tweets))],
         }
     return record
 
@@ -138,7 +146,7 @@ def sentimentAnalysis(sentence):
 #     return doc._.blob.polarity, doc._.blob.subjectivity
 
 
-def find_key_tweets(query, data, name, k=10, max_df=0.95, svdSize=20, sentFunc=sentimentAnalysis):
+def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20, sentFunc=sentimentAnalysis):
     """given a query, find tweets that best match
     using svd to determine similarity
 

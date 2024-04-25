@@ -56,6 +56,7 @@ def home():
 @ app.route("/episodes")
 def episodes_search():
     text = request.args.get("title")
+    text = text.lower()
     # print(svd_cos(text, docs, wcnt, dcn, itp))
     record = boolean_search(text, itp, tweets)
     if record is None:
@@ -65,7 +66,7 @@ def episodes_search():
 
     if record is not None:
         record = update_json(record, people_csv)
-    # print(record)
+    print(record)
     return json.dumps(record)
 
 

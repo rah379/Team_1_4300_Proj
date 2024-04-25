@@ -352,7 +352,7 @@
                             topTweets = data["top tweets"][i][0]["Content"];
                         }
                         // document.getElementById("loading").style.display = "none";
-                        if (data["top tweets"][i].length > 1) {
+                        if ((data["top tweets"][i].length > 1) && (data["average sentiment"][i] == 0)) {
                             tempDiv.innerHTML = answerBoxTemplate(
                                 data["matches"][i],
                                 data["similarity"][i],
