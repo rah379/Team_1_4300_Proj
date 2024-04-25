@@ -344,29 +344,36 @@
                         document.getElementById("answer-box").appendChild(tempDiv);
                     }
                     document.getElementById("loading").style.display = "none";
-                    console.log(data)
+                    found = false;
                     for (let i = 0; i < data["matches"].length; i++) {
                         let tempDiv = document.createElement("div");
                         let topTweets = "No specific relevant tweets found :(";
                         if (data["top tweets"][i].length > 0) {
                             topTweets = data["top tweets"][i][0]["Content"];
                         }
-                        document.getElementById("loading").style.display = "none";
-                        tempDiv.innerHTML = answerBoxTemplate(
-                            data["matches"][i],
-                            data["similarity"][i],
-                            match_similarity(data["similarity"][i]),
-                            data["handles"][i],
-                            topTweets,
-                            data["popularity score"][i],
-                            data["profile_images"][i],
-                            data["country"][i],
-                            data["chamber"][i],
-                            data["party"][i],
-                            data["region"][i]
-                        );
+                        // document.getElementById("loading").style.display = "none";
+                        if (data["top tweets"][i].length > 1) {
+                            tempDiv.innerHTML = answerBoxTemplate(
+                                data["matches"][i],
+                                data["similarity"][i],
+                                match_similarity(data["similarity"][i]),
+                                data["handles"][i],
+                                topTweets,
+                                data["popularity score"][i],
+                                data["profile_images"][i],
+                                data["country"][i],
+                                data["chamber"][i],
+                                data["party"][i],
+                                data["region"][i]
+                            );
+                            found = true;
+                            document.getElementById("answer-box").appendChild(tempDiv);
+                        }
+                    }
+                    if (!found) {
+                        let tempDiv = document.createElement("div");
+                        tempDiv.innerHTML = "<h1>No matches found :( Try refining your search </h1>";
                         document.getElementById("answer-box").appendChild(tempDiv);
-
                     }
                 });
         }

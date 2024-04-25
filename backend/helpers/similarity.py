@@ -10,11 +10,11 @@ from scipy.sparse.linalg import svds
 
 # sentiment analysis
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-import spacy
-from spacytextblob.spacytextblob import SpacyTextBlob
+# import spacy
+# from spacytextblob.spacytextblob import SpacyTextBlob
 
 
-def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.95, min_df=3):
+def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=5, max_df=0.95, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
                                  min_df=min_df)
     """
@@ -31,6 +31,8 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
 
     if len(asort) == 0:
         return None
+    k_tweets = [find_key_tweets(query, tweets, itp[str(i)][0])
+                for i in asort[1:]]
     record = {
         "index": [int(i) for i in asort[1:]],
         "matches": [itp[str(i)][0] for i in asort[1:]],
@@ -38,7 +40,8 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         "profile_images": [itp[str(i)][2] for i in asort[1:]],
         "similarity": [round(sims[i], 4) for i in asort[1:]],
         "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 4) for i in asort[1:]],
-        "top tweets": [find_key_tweets(query, tweets, itp[str(i)][0]) for i in asort[1:]]
+        "top tweets": k_tweets,
+        # "average sentiment": [getAvgSentiment(k_tweets[i], sentimentAnalysis) for i in range(len(k_tweets))],
     }
     return record
 
@@ -105,26 +108,38 @@ def boolean_search(query, itp, tweets, thresh=0.5):
     ret = sorted(ret, key=lambda x: x[2], reverse=True)
     record = None
     if len(ret) > 0:
+        k_tweets = [find_key_tweets(query, tweets, ele[1]) for ele in ret]
         record = {
             "index": [element[0] for element in ret],
             "matches": [ele[1] for ele in ret],
             "handles": [itp[str(ele[0])][1] for ele in ret],
             "profile_images": [itp[str(ele[0])][2] for ele in ret],
             "similarity": [round(ele[2], 4) for ele in ret],
-            "top tweets": [find_key_tweets(query, tweets, ele[1]) for ele in ret],
-            "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 4) for ele in ret]
+            "top tweets": k_tweets,
+            "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 4) for ele in ret],
+            "average sentiment": [getAvgSentiment(k_tweets[i], sentimentAnalysis)[0] for i in range(len(k_tweets))],
         }
     return record
 
-
-# testing
-# with open('data/json/index_politicians.json', 'r') as f:
-#     itp = json.load(f)
-# print(boolean_search("catherine cortez masto", itp))
+# sentiment analysis
 
 
-def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20):
-    """given a query, find tweets that best match 
+def sentimentAnalysis(sentence):
+    analyzer = SentimentIntensityAnalyzer()
+    sentiment = analyzer.polarity_scores(sentence)
+    return sentiment['compound'], 0.5
+
+
+# def spacySentimentAnalysis(sentence):
+#     # DON't USE - TOO SLOW
+#     nlp = spacy.load('en_core_web_sm')
+#     nlp.add_pipe('spacytextblob')
+#     doc = nlp(sentence)
+#     return doc._.blob.polarity, doc._.blob.subjectivity
+
+
+def find_key_tweets(query, data, name, k=10, max_df=0.95, svdSize=20, sentFunc=sentimentAnalysis):
+    """given a query, find tweets that best match
     using svd to determine similarity
 
     query: string
@@ -136,9 +151,11 @@ def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20):
 
     top_tweets = []
     # should contain tuples of (content, likes, retweets, and url)
-
+    query_sentiment = sentFunc(query)[0]
     relevant = data[name]
     tweets = [tweet['Content'] for tweet in relevant]
+    # tweets = [tweet['Content'] for tweet in relevant if np.sign(
+    #     sentFunc(tweet['Content'])[0]) == np.sign(query_sentiment[0])]
     ctweets = [remove_long_words(tweet) for tweet in tweets]
     ctweets = [remove_numbers(tweet) for tweet in ctweets]
 
@@ -166,38 +183,27 @@ def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20):
         #                    "URL": relevant[0]['URL']})
 
     for ind in asort:
-        if sims[ind] > 0:  # only append the relevant ones
+        # print(tweets[ind])
+        if sims[ind] > 0 and (np.sign(sentFunc(tweets[ind])[0]) == np.sign(query_sentiment) or query_sentiment == 0):
+            # only append the relevant ones
+            # print(getAvgSentiment([{"Content": tweets[ind]}], sentFunc))
             top_tweets.append({"Content": tweets[ind],
                                "Likes": relevant[ind]['Likes'],
                                "Retweets": relevant[ind]['Retweets'],
-                               "URL": relevant[ind]['URL']})
+                               "URL": relevant[ind]['URL'],
+                               "Similarity": round(sims[ind], 2),
+                               "Sentiment": sentFunc(tweets[ind])[0]})
     # print(top_tweets)
     return top_tweets
 
 
-# with open('data/tweets/clean.json', 'r') as file:
-#     data = json.load(file)
-
-# find_key_tweets("vote for trump!", data, "Lee Zeldin")
-
-def sentimentAnalysis(sentence):
-    analyzer = SentimentIntensityAnalyzer()
-    sentiment = analyzer.polarity_scores(sentence)
-    return sentiment
-
-
-def spacySentimentAnalysis(sentence):
-    nlp = spacy.load('en_core_web_sm')
-    nlp.add_pipe('spacytextblob')
-    doc = nlp(sentence)
-    return doc._.blob.polarity, doc._.blob.subjectivity
-
-# nlp = spacy.load('en_core_web_sm')
-# nlp.add_pipe('spacytextblob')
-# text = 'I had a really horrible day. It was the worst day ever! But every now and then I have a really good day that makes me happy.'
-# doc = nlp(text)
-# print(doc._.blob.polarity)                       # Polarity: -0.125
-# print(doc._.blob.subjectivity)                        # Subjectivity: 0.9
-# # Assessments: [(['really', 'horrible'], -1.0, 1.0, None), (['worst', '!'], -1.0, 1.0, None), (['really', 'good'], 0.7, 0.6000000000000001, None), (['happy'], 0.8, 1.0, None)]
-# doc._.blob.sentiment_assessments.assessments
-# doc._.blob.ngrams()
+def getAvgSentiment(tweets, sentFunc):
+    if len(tweets) == 0:
+        return 0, 0
+    totalPolarity = 0
+    totalSubjectivity = 0
+    for tweet in tweets:
+        polarity, subjectivity = sentFunc(tweet['Content'])
+        totalPolarity += polarity
+        totalSubjectivity += subjectivity
+    return totalPolarity / len(tweets), totalSubjectivity / len(tweets)
