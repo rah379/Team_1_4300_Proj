@@ -1,4 +1,5 @@
 import json
+import re
 
 
 def print_lengths_of_items(json_file):
@@ -158,6 +159,20 @@ irrelevant = [
     "Congressional Hispanic Caucus",
     "Congressional Dads Caucus",
     "The Evening Edit",
+    "Senate Judiciary Committee",
+    "New York Post",
+    "A Starting Point",
+    "Veterans Affairs",
+    "NWSHonolulu",
+    "Problem Solvers Caucus",
+    "US Department of the Interior",
+    "Steak for Breakfast",
+    "National Review",
+    "Senate Foreign Relations Committee",
+    "Senate Budget GOP",
+    "UAW",
+    "Weaponization Committee",
+    "1819 News",
 ]
 
 duplicates = {
@@ -175,13 +190,67 @@ duplicates = {
     "Rep. Josh Harder": "Josh Harder",
     "Rep. Dusty Johnson": "Dusty Johnson",
     "Office of Rep. Amash Archive": "Justin Amash",
+    "Rep. Dean Phillips": "Dean Phillips",
+    "Congresswoman Rashida Tlaib": "Rashida Tlaib",
+    "Lieutenant Governor Antonio Delgado": "Antonio Delgado",
 }
 
-# marie newman
-# leader mcconnell
-# rep nadler
+rename_map = {
+    "CathyMcMorrisRodgers": "Cathy McMorris Rodgers",
+    "Vice President Mike Pence Archived": "Mike Pence",
+    "Archive: Rep. Cheri Bustos": "Cheri Bustos",
+    "Archive: Rep. Jeb Hensarling": "Jeb Hensarling",
+    "Archive: Rep. John Delaney": "John Delaney",
+    "Former Rep. Daniel Lipinski": "Daniel Lipinski",
+    "Col. Paul Cook (Ret.)": "Paul Cook",
+    "Eleanor #DCStatehood Holmes Norton": "Eleanor Holmes Norton",
+    "Archive: Rep. Ron Kind": "Ron Kind",
+    "Archive: Steve Stivers": "Steve Stivers",
+    "Archive: Sen. Heidi Heitkamp": "Heidi Heitkamp",
+    "Pat Toomey (US Sen. ret.)": "Pat Toomey",
+    "Archive: Senator Joe Donnelly": "Joe Donnelly",
+    "Fmr. US Rep. Rick Nolan": "Rick Nolan",
+    "Archive: Dave Loebsack (Retired US Rep)": "Dave Loebsack",
+    "Senator Cortez Masto": "Catherine Cortez Masto",
+    "Archived: U.S. Rep Kathleen Rice": "Kathleen Rice",
+    "Archive: Congressman Tim Ryan": "Tim Ryan",
+    "Archive: Nita Lowey": "Nita Lowey",
+    "Rep. Gallagher Press Office": "Mike Gallagher",
+    "Archive: Rep. John Shimkus": "John Shimkus",
+    "Archived: Rep. Tom O'Halleran": "Tom O'Halleran",
+    "Mark Sanford (Archived)": "Mark Sanford",
+    "Office of Rep. Nicole Malliotakis": "Nicole Malliotakis",
+    "Archive: Tom MacArthur": "Tom MacArthur",
+    "Jared Golden for Congress": "Jared Golden",
+    "Archived: Rep. Tom Malinowski": "Tom Malinowski",
+    "Ben McAdams UT": "Ben McAdams",
+    "Archived: Rep. Max Rose": "Max Rose",
+    "Archived: Rep. Xochitl Torres Small": "Xochitl Torres Small",
+    "CEO, Former Congresswoman, Author, Entrepreneur": "Marie Newman",
+    "Archive: Senator Tom Udall": "Tom Udall",
+    "Leader McConnell": "Mitch McConnell",
+    "Rep. Nadler": "Jerry Nadler",
+    "Rep. Cammack Press Office": "Kat Cammack",
+    "Rep. Chip Roy Press Office": "Chip Roy",
+    "Mac Thornberry Press": "Mac Thornberry",
+    "Archive: U.S. Rep. Stephanie Murphy": "Stephanie Murphy",
+    "MichelleLujanGrisham": "Michelle Lujan Grisham",
+}
 
-# also weird symboled individuals
+titles = [
+    "US Rep. ",
+    "U.S. ",
+    "Former ",
+    "Rep.",
+    "Sen.",
+    "Sen ",
+    "Rep ",
+    "Senator ",
+    "Speaker",
+    "Congressman",
+    "Congresswoman",
+    "Representative",
+]
 
 
 def remove_keys_from_json(json_file, irrelevant_indices):
@@ -244,3 +313,30 @@ def combine_aliased_keys(json_file, output, alias_map):
 
 combine_aliased_keys('data/tweets/raw.json',
                      'data/tweets/clean.json', duplicates)
+
+
+def rename_keys(input, output, key_map, titles):
+    """
+    Rename keys in a dictionary according to a mapping provided.
+
+    Parameters:
+        d (dict): The dictionary to be modified.
+        key_map (dict): A dictionary where keys are the current keys in `d`
+                        and values are the new keys.
+
+    Returns:
+        dict: A new dictionary with keys renamed according to `key_map`.
+    """
+    with open(input, 'r') as f:
+        d = json.load(f)
+    data = {key_map.get(k, k): v for k, v in d.items()}
+    for title in titles:
+        # print(title)
+        data = {k.replace(title, "").lstrip(): v for k, v in data.items()}
+
+    with open(output, 'w') as f:
+        json.dump(data, f, indent=4)
+
+
+rename_keys('data/tweets/clean.json',
+            'data/tweets/clean.json', rename_map, titles)

@@ -8,6 +8,11 @@ import json
 from helpers.cleaning.utils import remove_long_words, remove_numbers
 from scipy.sparse.linalg import svds
 
+# sentiment analysis
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
+
 
 def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.95, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
@@ -93,7 +98,8 @@ def boolean_search(query, itp, tweets, thresh=0.5):
         curr_name = curr_names[i]
         cwords = curr_name.lower().split()
         intersection = [value for value in qwords if value in cwords]
-        if (len(intersection) / len(cwords) > thresh) and (len(intersection) / len(qwords) > thresh):
+        # we want it to match the query
+        if (len(intersection) / len(cwords) > thresh) and (len(intersection) / len(qwords) > 0.99):
             # we want good matches
             ret.append((i, curr_name, len(intersection) / len(cwords)))
     ret = sorted(ret, key=lambda x: x[2], reverse=True)
@@ -117,7 +123,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
 # print(boolean_search("catherine cortez masto", itp))
 
 
-def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20):
+def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20):
     """given a query, find tweets that best match 
     using svd to determine similarity
 
@@ -160,10 +166,11 @@ def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20):
         #                    "URL": relevant[0]['URL']})
 
     for ind in asort:
-        top_tweets.append({"Content": tweets[ind],
-                           "Likes": relevant[ind]['Likes'],
-                          "Retweets": relevant[ind]['Retweets'],
-                           "URL": relevant[ind]['URL']})
+        if sims[ind] > 0:  # only append the relevant ones
+            top_tweets.append({"Content": tweets[ind],
+                               "Likes": relevant[ind]['Likes'],
+                               "Retweets": relevant[ind]['Retweets'],
+                               "URL": relevant[ind]['URL']})
     # print(top_tweets)
     return top_tweets
 
@@ -172,3 +179,25 @@ def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20):
 #     data = json.load(file)
 
 # find_key_tweets("vote for trump!", data, "Lee Zeldin")
+
+def sentimentAnalysis(sentence):
+    analyzer = SentimentIntensityAnalyzer()
+    sentiment = analyzer.polarity_scores(sentence)
+    return sentiment
+
+
+def spacySentimentAnalysis(sentence):
+    nlp = spacy.load('en_core_web_sm')
+    nlp.add_pipe('spacytextblob')
+    doc = nlp(sentence)
+    return doc._.blob.polarity, doc._.blob.subjectivity
+
+# nlp = spacy.load('en_core_web_sm')
+# nlp.add_pipe('spacytextblob')
+# text = 'I had a really horrible day. It was the worst day ever! But every now and then I have a really good day that makes me happy.'
+# doc = nlp(text)
+# print(doc._.blob.polarity)                       # Polarity: -0.125
+# print(doc._.blob.subjectivity)                        # Subjectivity: 0.9
+# # Assessments: [(['really', 'horrible'], -1.0, 1.0, None), (['worst', '!'], -1.0, 1.0, None), (['really', 'good'], 0.7, 0.6000000000000001, None), (['happy'], 0.8, 1.0, None)]
+# doc._.blob.sentiment_assessments.assessments
+# doc._.blob.ngrams()

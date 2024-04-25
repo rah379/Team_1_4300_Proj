@@ -26,4 +26,6 @@ pyvenv.cfg
 .idea
 4300_project
 
-backend/data/tweets/scraped.csv
+scraped.csv
+TODOS.md
+backend/experimental/sandbox.py
