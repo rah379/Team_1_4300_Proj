@@ -70,6 +70,11 @@ def normalize_name(name):
     return name.strip()
 
 
+def flip_name(name):
+    name = name.split()
+    return name[-1] + " " + " ".join(name[:-1])
+
+
 def update_json(input_json):
     people_data = json.loads(people_csv)
     people_dict = {normalize_name(
@@ -77,8 +82,20 @@ def update_json(input_json):
 
     for _, match in enumerate(input_json['matches']):
         normalized_match = normalize_name(match)
+        # print(normalized_match)
+        # print(flip_name(normalized_match))
         if normalized_match in people_dict:
             person = people_dict[normalized_match]
+            input_json['country'] = input_json.get(
+                'country', []) + [person['country']]
+            input_json['chamber'] = input_json.get(
+                'chamber', []) + [person['chamber']]
+            input_json['party'] = input_json.get(
+                'party', []) + [person['party']]
+            input_json['region'] = input_json.get(
+                'region', []) + [person['region']]
+        elif flip_name(normalized_match) in people_dict:
+            person = people_dict[flip_name(normalized_match)]
             input_json['country'] = input_json.get(
                 'country', []) + [person['country']]
             input_json['chamber'] = input_json.get(
