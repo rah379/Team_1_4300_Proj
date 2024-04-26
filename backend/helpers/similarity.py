@@ -14,7 +14,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 # from spacytextblob.spacytextblob import SpacyTextBlob
 
 
-def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=10, max_df=0.95, min_df=3):
+def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=5, max_df=0.95, min_df=3):
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df,
                                  min_df=min_df)
     """
@@ -25,11 +25,16 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
     query_vec = normalize(
         np.dot(query_tfidf, words_compressed_normed_transpose)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
-    asort = np.argsort(-sims)[:k]
+    asort = np.argsort(-sims)[:k+3]  # to allow for buffer
     # we only want similarity scores that are greater than 0
     asort = [item for item in asort if sims[item] > 0]
 
     qsentiment = sentimentAnalysis(query)[0]
+    # not is not always captured
+    if "not" in query.lower().split():
+        notquery = query.replace("not", "")
+        if np.sign(sentimentAnalysis(notquery)[0]) == np.sign(qsentiment):
+            qsentiment = -qsentiment
     if qsentiment == 0:  # slightly inflating up
         qsentiment = 0.01
 
@@ -101,8 +106,8 @@ def boolean_search(query, itp, tweets, thresh=0.5):
     query = autocorrect(query, curr_names)
 
     qsentiment = sentimentAnalysis(query)[0]
-    if qsentiment == 0:  # slightly inflating up
-        qsentiment = 0.01
+    # if qsentiment == 0:  # slightly inflating up
+    #     qsentiment = 0.01
 
     qwords = query.lower().split()
     for i in range(len(curr_names)):
@@ -116,7 +121,8 @@ def boolean_search(query, itp, tweets, thresh=0.5):
     ret = sorted(ret, key=lambda x: x[2], reverse=True)
     record = None
     if len(ret) > 0:
-        k_tweets = [find_key_tweets(query, tweets, ele[1]) for ele in ret]
+        k_tweets = [find_recent_tweets(tweets, ele[1]) for ele in ret]
+        # print(k_tweets)
         record = {
             "index": [element[0] for element in ret],
             "matches": [ele[1] for ele in ret],
@@ -125,7 +131,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
             "similarity": [round(ele[2], 4) for ele in ret],
             "top tweets": k_tweets,
             "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 4) for ele in ret],
-            "average sentiment": [0 for i in range(len(k_tweets))],
+            "average sentiment": [qsentiment for i in range(len(k_tweets))],
         }
     return record
 
@@ -138,15 +144,7 @@ def sentimentAnalysis(sentence):
     return sentiment['compound'], 0.5
 
 
-# def spacySentimentAnalysis(sentence):
-#     # DON't USE - TOO SLOW
-#     nlp = spacy.load('en_core_web_sm')
-#     nlp.add_pipe('spacytextblob')
-#     doc = nlp(sentence)
-#     return doc._.blob.polarity, doc._.blob.subjectivity
-
-
-def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20, sentFunc=sentimentAnalysis):
+def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20, sentFunc=sentimentAnalysis):
     """given a query, find tweets that best match
     using svd to determine similarity
 
@@ -202,6 +200,19 @@ def find_key_tweets(query, data, name, k=5, max_df=0.95, svdSize=20, sentFunc=se
                                "Similarity": round(sims[ind], 2),
                                "Sentiment": sentFunc(tweets[ind])[0]})
     # print(top_tweets)
+    return top_tweets
+
+
+def find_recent_tweets(data, name, k=3):
+    top_tweets = []
+    relevant = data[name]
+    for i in range(k):
+        top_tweets.append({"Content": relevant[i]['Content'],
+                           "Likes": relevant[i]['Likes'],
+                           "Retweets": relevant[i]['Retweets'],
+                           "URL": relevant[i]['URL'],
+                           "Similarity": 0.5,
+                           "Sentiment": 0})
     return top_tweets
 
 
