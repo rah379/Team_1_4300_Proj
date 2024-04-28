@@ -319,7 +319,12 @@
                             <span class="fa-solid fa-democrat gov-icon"></span> Political Party: ${party}
                         </p>
                     </div>
-                <p class="info">Matched Tweets: ${tweets}</p>
+                <div id="dropdown-header" class="header">More Info <i class="fas fa-chevron-down"></i></div>
+                <div class="dropdown-content">
+                    ${tweets.length > 0 ?
+                        tweets.map(tweet => `<p class="info">${tweet}</p>`).join("") :
+                        "Sorry no tweets were found :("}
+                </div>
             </div>`;
         }
 
@@ -347,9 +352,11 @@
                     found = false;
                     for (let i = 0; i < data["matches"].length; i++) {
                         let tempDiv = document.createElement("div");
-                        let topTweets = "No specific relevant tweets found :(";
-                        if (data["top tweets"][i].length > 0) {
-                            topTweets = data["top tweets"][i][0]["Content"];
+                        let topTweets = [];
+                        let numTweets = data["top tweets"][i].length
+
+                        for(let k = 0; k < Math.min(numTweets, 5); k++) {
+                            topTweets.push(data["top tweets"][i][k]["Content"]);
                         }
                         // document.getElementById("loading").style.display = "none";
                         if ((data["top tweets"][i].length > 1) && (data["average sentiment"][i] == 0)) {
