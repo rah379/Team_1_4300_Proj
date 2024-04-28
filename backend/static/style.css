@@ -136,6 +136,7 @@ sl-card::part(base) {
   color: #2a5db0;
   font-size: 18px;
   user-select: none;
+  margin-bottom: 8px;
 }
 
 .info {
@@ -189,6 +190,34 @@ sl-card::part(base) {
   display: none;
   padding: 10px;
   border-top: 1px solid #ccc;
+}
+
+.tweet {
+  border: 1px solid rgb(207, 217, 222);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.tweet:hover{
+  border: 1px solid #0056b3;
+}
+
+.tweet a{
+  text-decoration: none;
+  color: black;
+}
+
+.tweet-stats {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.tweet-icon {
+  vertical-align: middle;
+  margin-right: 6px;
+  margin-left: 9px;
 }
 
 .dropdown-content.show-more {

@@ -323,9 +323,13 @@
                 <div class="dropdown-content">
                     ${tweets.length > 0 ?
                         tweets.map(tweet =>
-                            `<p class="info">
+                            `<div class="tweet">
                                 <a href=${tweet.URL}>${tweet.Content}</a>
-                            </p>`).join("") :
+                                <div class="tweet-stats">
+                                    <p><span class="fa-solid fa-heart tweet-icon"></span> Likes: ${tweet.Likes}</p>
+                                    <p><span class="fa-solid fa-retweet tweet-icon"></span>Retweets: ${tweet.Retweets}</p>
+                                </div>
+                            </div>`).join("") :
                         "Sorry no tweets were found :("}
                 </div>
             </div>`;
