@@ -173,6 +173,17 @@ irrelevant = [
     "UAW",
     "Weaponization Committee",
     "1819 News",
+    "Neil Cavuto",
+    "Stephen Miller",
+    "Bill Melugin",
+    "Jake Sherman",
+    "Maria Bartiromo",
+    "Matthew Foldi",
+    "Ali Bradley",
+    "Daily Caller",
+    "The Democrats",
+    "Rachel Campos-Duffy",
+    "Henry Rodgers"
 ]
 
 duplicates = {
@@ -193,6 +204,8 @@ duplicates = {
     "Rep. Dean Phillips": "Dean Phillips",
     "Congresswoman Rashida Tlaib": "Rashida Tlaib",
     "Lieutenant Governor Antonio Delgado": "Antonio Delgado",
+    "Congressman David N. Cicilline": "David Cicilline",
+    "Lizzie Pannill Fletcher": "Lizzie Fletcher",
 }
 
 rename_map = {
@@ -235,21 +248,37 @@ rename_map = {
     "Mac Thornberry Press": "Mac Thornberry",
     "Archive: U.S. Rep. Stephanie Murphy": "Stephanie Murphy",
     "MichelleLujanGrisham": "Michelle Lujan Grisham",
+    "Donald M. Payne, Jr.": "Donald Payne Jr.",
+    "Bill Pascrell, Jr.": "Bill Pascrell Jr.",
+    "Congressmember Bass": "Karen Bass",
+    "John Joyce, M.D.": "John Joyce",
+    "Lacy Clay MO1st": "Lacy Clay",
 }
 
 titles = [
     "US Rep. ",
     "U.S. ",
     "Former ",
+    "Fmr. ",
     "Rep.",
     "Sen.",
     "Sen ",
     "Rep ",
+    "Hon. ",
     "Senator ",
     "Speaker",
     "Congressman",
     "Congresswoman",
     "Representative",
+    "Dr.",
+    "Secretary",
+    "Governor",
+    ", M.D.",
+    "Cong. ",
+    ", MD",
+    ", Ph.D.",
+    ", Jr.",
+    "Del. ",
 ]
 
 
