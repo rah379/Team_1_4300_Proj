@@ -35,20 +35,21 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         notquery = query.replace("not", "")
         if np.sign(sentimentAnalysis(notquery)[0]) == np.sign(qsentiment):
             qsentiment = -qsentiment
-    if qsentiment == 0:  # slightly inflating up
-        qsentiment = 0.01
+    # if qsentiment == 0:  # slightly inflating up
+    #     qsentiment = 0.01
 
     if len(asort) == 0:
         return None
+    start = 0
     k_tweets = [find_key_tweets(query, tweets, itp[str(i)][0])
-                for i in asort[1:]]
+                for i in asort[start:]]
     record = {
-        "index": [int(i) for i in asort[1:]],
-        "matches": [itp[str(i)][0] for i in asort[1:]],
-        "handles": [itp[str(i)][1] for i in asort[1:]],
-        "profile_images": [itp[str(i)][2] for i in asort[1:]],
-        "similarity": [round(sims[i], 4) for i in asort[1:]],
-        "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 4) for i in asort[1:]],
+        "index": [int(i) for i in asort[start:]],
+        "matches": [itp[str(i)][0] for i in asort[start:]],
+        "handles": [itp[str(i)][1] for i in asort[start:]],
+        "profile_images": [itp[str(i)][2] for i in asort[start:]],
+        "similarity": [round(sims[i], 4) for i in asort[start:]],
+        "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 1) for i in asort[start:]],
         "top tweets": k_tweets,
         "average sentiment": [np.sign(getAvgSentiment(k_tweets[i], sentimentAnalysis)[0]) - np.sign(qsentiment) for i in range(len(k_tweets))],
     }
@@ -190,7 +191,7 @@ def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20, sentFunc=se
 
     for ind in asort:
         # print(tweets[ind])
-        if sims[ind] > 0 and (np.sign(sentFunc(tweets[ind])[0]) == np.sign(query_sentiment) or query_sentiment == 0):
+        if sims[ind] > 0 and (np.sign(sentFunc(tweets[ind])[0]) == np.sign(query_sentiment) or np.abs(query_sentiment) < 0.1):
             # only append the relevant ones
             # print(getAvgSentiment([{"Content": tweets[ind]}], sentFunc))
             top_tweets.append({"Content": tweets[ind],
