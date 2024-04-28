@@ -319,7 +319,7 @@
                             <span class="fa-solid fa-democrat gov-icon"></span> Political Party: ${party}
                         </p>
                     </div>
-                <div id="dropdown-header" class="header">More Info <i class="fas fa-chevron-down"></i></div>
+                <div id="dropdown-header" class="header tweet-dropdown">Show Tweets <i class="fas fa-chevron-down"></i></div>
                 <div class="dropdown-content">
                     ${tweets.length > 0 ?
                         tweets.map(tweet =>
@@ -398,9 +398,13 @@
                     const header = event.target.closest('.header');
                     const content = header.nextElementSibling;
                     content.classList.toggle('show-more');
+                    const toggletext = header.classList.contains('tweet-dropdown') ?
+                        {open: "Show Tweets", close: "Hide Tweets"} :
+                        {open: "More Info", close: "Less Info"}
+
                     header.innerHTML = content.classList.contains('show-more') ?
-                        `Less Info <i class="fas fa-chevron-up" aria-hidden="true"></i>` :
-                        `More Info <i class="fas fa-chevron-down" aria-hidden="true"></i>`;
+                        `${toggletext.close} <i class="fas fa-chevron-up" aria-hidden="true"></i>` :
+                        `${toggletext.open} <i class="fas fa-chevron-down" aria-hidden="true"></i>`;
                 }
             });
 
