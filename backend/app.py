@@ -66,7 +66,7 @@ def episodes_search():
 
     if record is not None:
         record = update_json(record, people_csv)
-    print(record)
+    # print(record)
     return json.dumps(record)
 
 
