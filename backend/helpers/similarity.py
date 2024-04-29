@@ -95,7 +95,7 @@ def boolean_search(query, itp, tweets, thresh=0.49):
     # if qsentiment == 0:  # slightly inflating up
     #     qsentiment = 0.01
 
-    qwords = query.lower().split()
+    qwords = list(set(query.lower().split()))
     for i in range(len(curr_names)):
         curr_name = curr_names[i]
         cwords = curr_name.lower().split()
