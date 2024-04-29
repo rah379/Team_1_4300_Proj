@@ -190,6 +190,10 @@ sl-card::part(base) {
   display: none;
   padding: 10px;
   border-top: 1px solid #ccc;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
 }
 
 .tweet {
@@ -222,6 +226,9 @@ sl-card::part(base) {
 
 .dropdown-content.show-more {
   display: block;
+  opacity: 1;
+  max-height: 600px;
+
 }
 
 #loading {
