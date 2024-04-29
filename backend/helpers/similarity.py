@@ -10,8 +10,6 @@ from scipy.sparse.linalg import svds
 
 # sentiment analysis
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-# import spacy
-# from spacytextblob.spacytextblob import SpacyTextBlob
 
 
 def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compressed_normed, itp, k=5, max_df=0.95, min_df=3):
@@ -48,7 +46,7 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         "matches": [itp[str(i)][0] for i in asort[start:]],
         "handles": [itp[str(i)][1] for i in asort[start:]],
         "profile_images": [itp[str(i)][2] for i in asort[start:]],
-        "similarity": [round(sims[i], 4) for i in asort[start:]],
+        "similarity": [str(round(sims[i]*100, 1)) + "%" for i in asort[start:]],
         "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 1) for i in asort[start:]],
         "top tweets": k_tweets,
         "average sentiment": [np.sign(getAvgSentiment(k_tweets[i], sentimentAnalysis)[0]) - np.sign(qsentiment) for i in range(len(k_tweets))],
@@ -82,18 +80,6 @@ def get_popularity(data, name, weight_likes, weight_rt):
     return avg_like_score + avg_retweet_score
 
 
-# NOT IMPLEMENTED YET
-def autocorrect(query, keywords, max_dist=2):
-    """uses levenshtein edit distance to match query to words in a given list of words
-    basically checking if mistakes were made and then correcting that
-    the goal is to return an autocorrected string (with at most max_distance away per token/word)
-
-    query: string
-    keywords: list of words/tokens (including key topics and politician names)"""
-    return query
-    # pass
-
-
 def boolean_search(query, itp, tweets, thresh=0.5):
     """does boolean search on the query with the politician name
     this is helpful if we're just searching up an individual politician
@@ -104,7 +90,6 @@ def boolean_search(query, itp, tweets, thresh=0.5):
     thresh: how similar things have to be to be considered a match"""
     ret = []
     curr_names = [itp[key][0] for key in itp.keys()]
-    query = autocorrect(query, curr_names)
 
     qsentiment = sentimentAnalysis(query)[0]
     # if qsentiment == 0:  # slightly inflating up
@@ -129,9 +114,9 @@ def boolean_search(query, itp, tweets, thresh=0.5):
             "matches": [ele[1] for ele in ret],
             "handles": [itp[str(ele[0])][1] for ele in ret],
             "profile_images": [itp[str(ele[0])][2] for ele in ret],
-            "similarity": [round(ele[2], 4) for ele in ret],
+            "similarity": ["100%" for ele in ret],
             "top tweets": k_tweets,
-            "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 4) for ele in ret],
+            "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 1) for ele in ret],
             "average sentiment": [qsentiment for i in range(len(k_tweets))],
         }
     return record
@@ -212,7 +197,7 @@ def find_recent_tweets(data, name, k=3):
                            "Likes": relevant[i]['Likes'],
                            "Retweets": relevant[i]['Retweets'],
                            "URL": relevant[i]['URL'],
-                           "Similarity": 0.5,
+                           "Similarity": "N/A - returning most recent tweets",
                            "Sentiment": 0})
     return top_tweets
 

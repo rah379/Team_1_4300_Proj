@@ -282,12 +282,18 @@
         function match_similarity(sim_in) {
             //still testing a few bounds- >.30 seems to generally be very good,
             //
-            if (sim_in > 0.3) {
+            sim_in = parseFloat(sim_in) / 100.0
+            if (sim_in == 1) {
+                return "N/A - Exact Match";
+            }
+            else if (sim_in > 0.3) {
                 return "Very Common Point";
             }
-            if (sim_in > 0.25) {
+            else if (sim_in > 0.25) {
                 return "Somewhat Common Point";
-            } else return "Not an Important Part of their Twitter";
+            }
+            return sim_in
+            // else return "Not an Important Part of their Twitter";
         }
 
         function answerBoxTemplate(matches, similarity, discussion, account, tweets, pop, img, country, chamber, party, region) {
@@ -322,16 +328,19 @@
                 <div id="dropdown-header" class="header tweet-dropdown">Show Tweets <i class="fas fa-chevron-down"></i></div>
                 <div class="dropdown-content">
                     ${tweets.length > 0 ?
-                        tweets.map(tweet =>
-                            `<div class="tweet">
+                    tweets.map(tweet =>
+                        `<div class="tweet">
                                 <a>${tweet.Content}</a>
                                 <div class="tweet-stats">
                                     <p><span class="fa-solid fa-heart tweet-icon"></span> Likes: ${tweet.Likes}</p>
                                     <p><span class="fa-solid fa-retweet tweet-icon"></span>Retweets: ${tweet.Retweets}</p>
                                     <p><span class="fa-solid fa-arrow-up-right-from-square"></span> <a href=${tweet.URL} style="text-decoration: underline;">View tweet on X</a></p>
                                 </div>
+                                <div class="tweet-stats">
+                                    <p> Similarity: ${tweet.Similarity}</p>
+                                </div>
                             </div>`).join("") :
-                        "Sorry no tweets were found :("}
+                    "Sorry no tweets were found :("}
                 </div>
             </div>`;
         }
@@ -363,11 +372,11 @@
                         let topTweets = [];
                         let numTweets = data["top tweets"][i].length
 
-                        for(let k = 0; k < Math.min(numTweets, 5); k++) {
+                        for (let k = 0; k < Math.min(numTweets, 5); k++) {
                             topTweets.push(data["top tweets"][i][k]);
                         }
                         // document.getElementById("loading").style.display = "none";
-                        if ((data["top tweets"][i].length > 1) && (data["average sentiment"][i] == 0)) {
+                        if ((data["top tweets"][i].length > 1) && (data["average sentiment"][i] <= 1 || data["average sentiment"][i] >= -1)) {
                             tempDiv.innerHTML = answerBoxTemplate(
                                 data["matches"][i],
                                 data["similarity"][i],
