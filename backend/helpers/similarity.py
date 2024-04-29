@@ -80,7 +80,7 @@ def get_popularity(data, name, weight_likes, weight_rt):
     return avg_like_score + avg_retweet_score
 
 
-def boolean_search(query, itp, tweets, thresh=0.5):
+def boolean_search(query, itp, tweets, thresh=0.49):
     """does boolean search on the query with the politician name
     this is helpful if we're just searching up an individual politician
     might be helpful to run levenshtein distance first to standardize
@@ -114,7 +114,7 @@ def boolean_search(query, itp, tweets, thresh=0.5):
             "matches": [ele[1] for ele in ret],
             "handles": [itp[str(ele[0])][1] for ele in ret],
             "profile_images": [itp[str(ele[0])][2] for ele in ret],
-            "similarity": ["100%" for ele in ret],
+            "similarity": [str(round(ele[2]*100, 1)) + "%" for ele in ret],
             "top tweets": k_tweets,
             "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 1) for ele in ret],
             "average sentiment": [qsentiment for i in range(len(k_tweets))],

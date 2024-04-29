@@ -283,8 +283,8 @@
             //still testing a few bounds- >.30 seems to generally be very good,
             //
             sim_in = parseFloat(sim_in) / 100.0
-            if (sim_in == 1) {
-                return "N/A - Exact Match";
+            if (sim_in == 1 || sim_in == 0.5 || sim_in == 0.667 || sim_in == 0.75) {
+                return "N/A - Name Match";
             }
             else if (sim_in > 0.3) {
                 return "Very Common Point";
