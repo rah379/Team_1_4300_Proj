@@ -101,7 +101,7 @@ def boolean_search(query, itp, tweets, thresh=0.49):
         cwords = curr_name.lower().split()
         intersection = [value for value in qwords if value in cwords]
         # we want it to match the query
-        if (len(intersection) / len(cwords) > thresh) and (len(intersection) / len(qwords) > 0.99):
+        if (len(intersection) / len(cwords) > thresh) and (len(intersection) / len(qwords) > thresh):
             # we want good matches
             ret.append((i, curr_name, len(intersection) / len(cwords)))
     ret = sorted(ret, key=lambda x: x[2], reverse=True)
