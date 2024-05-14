@@ -379,7 +379,7 @@
                             topTweets.push(data["top tweets"][i][k]);
                         }
                         // document.getElementById("loading").style.display = "none";
-                        if ((data["top tweets"][i].length > 1) && (data["avgsentiment"][i] <= 1 || data["avgsentiment"][i] >= -1)) {
+                        if ((data["top tweets"][i].length >= 1) && (data["avgsentiment"][i] <= 1 || data["avgsentiment"][i] >= -1)) {
                             tempDiv.innerHTML = answerBoxTemplate(
                                 data["matches"][i],
                                 data["similarity"][i],

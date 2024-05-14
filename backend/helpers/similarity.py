@@ -48,35 +48,34 @@ def svd_cos(query, docs, tweets, words_compressed_normed_transpose, docs_compres
         "profile_images": [itp[str(i)][2] for i in asort[start:]],
         "similarity": [str(round(sims[i]*100, 1)) + "%" for i in asort[start:]],
         "popularity score": [round(get_popularity(tweets, itp[str(i)][0], 1, 1), 1) for i in asort[start:]],
-        "top tweets": k_tweets,
-        "average sentiment": [np.sign(getAvgSentiment(k_tweets[i], sentimentAnalysis)[0]) - np.sign(qsentiment) for i in range(len(k_tweets))],
+        "top tweets": [k_tweets[i][0] for i in range(len(k_tweets))],
+        "sentiment": round(qsentiment, 2),
+        "avgsent": [k_tweets[i][1] for i in range(len(k_tweets))],
+        "avgsentiment": [np.sign(getAvgSentiment(k_tweets[i][0], sentimentAnalysis)[0]) - np.sign(qsentiment) for i in range(len(k_tweets))],
     }
     return record
 
 
+def parse_metric(value):
+    if value[-1] == 'K':
+        return float(value[:-1]) * 1000
+    elif value[-1] == 'M':
+        return float(value[:-1]) * 1000000
+    return float(value)
+
+
 def get_popularity(data, name, weight_likes, weight_rt):
     relevant = data[name]
-    avg_like_score = 0.
-    avg_retweet_score = 0.
-    for i in relevant:
-        likes = i['Likes']
-        retweets = i['Retweets']
-        if likes[len(likes) - 1] == 'K':
-            likes = (float)(likes[:len(likes) - 1]) * 1000
-        elif likes[len(likes) - 1] == 'M':
-            likes = (float)(likes[:len(likes) - 1]) * 1000000
-        else:
-            likes = (float)(likes[:len(likes)])
-        if retweets[len(retweets) - 1] == 'K':
-            retweets = (float)(retweets[:len(retweets) - 1]) * 1000
-        elif retweets[len(retweets) - 1] == 'M':
-            retweets = (float)(retweets[:len(retweets) - 1]) * 1000000
-        else:
-            retweets = (float)(retweets[:len(retweets)])
-        avg_like_score += weight_likes * likes
-        avg_retweet_score += weight_rt * retweets
-    avg_like_score /= len(relevant)
-    avg_retweet_score /= len(relevant)
+    # Convert list of dictionaries to a structured array for efficient processing
+    likes = np.array([parse_metric(item['Likes']) for item in relevant])
+    retweets = np.array([parse_metric(item['Retweets']) for item in relevant])
+
+    # Calculate weighted scores
+    avg_like_score = np.average(
+        likes, weights=np.repeat(weight_likes, len(likes)))
+    avg_retweet_score = np.average(
+        retweets, weights=np.repeat(weight_rt, len(retweets)))
+
     return avg_like_score + avg_retweet_score
 
 
@@ -117,7 +116,9 @@ def boolean_search(query, itp, tweets, thresh=0.49):
             "similarity": [str(round(ele[2]*100, 1)) + "%" for ele in ret],
             "top tweets": k_tweets,
             "popularity score": [round(get_popularity(tweets, ele[1], 1, 1), 1) for ele in ret],
-            "average sentiment": [qsentiment for i in range(len(k_tweets))],
+            "sentiment": [qsentiment for i in range(len(k_tweets))],
+            "avgsent": [qsentiment for i in range(len(k_tweets))],
+            "avgsentiment": [qsentiment for i in range(len(k_tweets))]
         }
     return record
 
@@ -146,10 +147,8 @@ def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20, sentFunc=se
     query_sentiment = sentFunc(query)[0]
     relevant = data[name]
     tweets = [tweet['Content'] for tweet in relevant]
-    # tweets = [tweet['Content'] for tweet in relevant if np.sign(
-    #     sentFunc(tweet['Content'])[0]) == np.sign(query_sentiment[0])]
-    ctweets = [remove_long_words(tweet) for tweet in tweets]
-    ctweets = [remove_numbers(tweet) for tweet in ctweets]
+    def preprocess(tweet): return remove_numbers(remove_long_words(tweet))
+    ctweets = [preprocess(tweet) for tweet in tweets]
 
     vectorizer = TfidfVectorizer(stop_words='english', max_df=max_df)
 
@@ -162,31 +161,49 @@ def find_key_tweets(query, data, name, k=3, max_df=0.95, svdSize=20, sentFunc=se
     query_vec = normalize(
         np.dot(query_tfidf, wcnt)).squeeze()
     sims = dcn.dot(query_vec)
-    asort = np.argsort(-sims)[:k]
-    # we only want similarity scores that are greater than 0
-    asort = [item for item in asort if sims[item] > 0]
-    if (len(asort) == 0):
-        # weird... no matches (but technically possible)
-        # defaulting based on first version
-        pass
-        # top_tweets.append({"Content": tweets[0],
-        #                    "Likes": relevant[0]['Likes'],
-        #                    "Retweets": relevant[0]['Retweets'],
-        #                    "URL": relevant[0]['URL']})
 
-    for ind in asort:
-        # print(tweets[ind])
-        if sims[ind] > 0 and (np.sign(sentFunc(tweets[ind])[0]) == np.sign(query_sentiment) or np.abs(query_sentiment) < 0.1):
-            # only append the relevant ones
-            # print(getAvgSentiment([{"Content": tweets[ind]}], sentFunc))
-            top_tweets.append({"Content": tweets[ind],
-                               "Likes": relevant[ind]['Likes'],
-                               "Retweets": relevant[ind]['Retweets'],
-                               "URL": relevant[ind]['URL'],
-                               "Similarity": round(sims[ind], 2),
-                               "Sentiment": sentFunc(tweets[ind])[0]})
+    # sims = dcn.dot(query_vec)
+    top_indices = np.argsort(-sims)[:k]
+    # filter by positive similarity
+    top_indices = top_indices[sims[top_indices] > 0]
+
+    query_sentiment = sentFunc(query)[0]
+    top_tweets = []
+    sentiments = [sentFunc(tweets[ind])[0] for ind in top_indices]
+    total = sum(sentiments)
+    dv = len(sentiments)
+
+    for ind, sentiment in zip(top_indices, sentiments):
+        # if np.sign(sentiment) == np.sign(query_sentiment):
+        top_tweets.append({
+            "Content": tweets[ind],
+            "Likes": relevant[ind]['Likes'],
+            "Retweets": relevant[ind]['Retweets'],
+            "URL": relevant[ind]['URL'],
+            "Similarity": round(sims[ind], 2),
+            "Sentiment": sentiment
+        })
+
+    avg = total / dv if dv > 0 else 0
     # print(top_tweets)
-    return top_tweets
+    return top_tweets, round(avg, 2)
+
+    # asort = np.argsort(-sims)[:k]
+    # # we only want similarity scores that are greater than 0
+    # asort = [item for item in asort if sims[item] > 0]
+    # for ind in asort:
+    #     # print(tweets[ind])
+    #     if sims[ind] > 0 and (np.sign(sentFunc(tweets[ind])[0]) == np.sign(query_sentiment) or np.abs(query_sentiment) < 0.1):
+    #         # only append the relevant ones
+    #         # print(getAvgSentiment([{"Content": tweets[ind]}], sentFunc))
+    #         top_tweets.append({"Content": tweets[ind],
+    #                            "Likes": relevant[ind]['Likes'],
+    #                            "Retweets": relevant[ind]['Retweets'],
+    #                            "URL": relevant[ind]['URL'],
+    #                            "Similarity": round(sims[ind], 2),
+    #                            "Sentiment": sentFunc(tweets[ind])[0]})
+    # # print(top_tweets)
+    # return top_tweets
 
 
 def find_recent_tweets(data, name, k=3):
