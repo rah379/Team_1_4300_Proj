@@ -296,7 +296,7 @@
             else return "Not an Important Part of their Twitter";
         }
 
-        function answerBoxTemplate(matches, similarity, discussion, account, tweets, pop, img, country, chamber, party, region) {
+        function answerBoxTemplate(matches, similarity, discussion, account, tweets, pop, img, country, chamber, party, region, sentiment, avgsent) {
             const flag_suff = get_flag_suff[country];
 
             return `<div class="card">
@@ -309,7 +309,8 @@
                     Twitter Account: <a href="https://twitter.com/${account}" target="_blank">${account}</a>
                 </p>
                 <p class='episode-desc'>Amount of Discussion On Their Twitter: ${discussion}</p>
-                <p class = 'episode-rating'>Popularity of Individual: ${pop}</p>
+                <p class = 'episode-rating'>Average Likes & Retweets (User Popularity): ${pop}</p>
+                <p class = 'episode-rating'>Average Tweet Sentiment Towards Query: ${avgsent}</p>
                 <div id="dropdown-header" class="header">More Info <i class="fas fa-chevron-down"></i></div>
                     <div class="dropdown-content">
                         <p class="info">
@@ -338,11 +339,13 @@
                                 </div>
                                 <div class="tweet-stats">
                                     <p> Similarity: ${tweet.Similarity}</p>
+                                    <p> Sentiment: ${tweet.Sentiment}</p>
                                 </div>
                             </div>`).join("") :
-                    "Sorry no tweets were found :("}
-                </div>
-            </div>`;
+                    "Sorry no tweets were found :("
+                }
+                </div >
+            </div >`;
         }
 
         function sendFocus() {
@@ -376,7 +379,7 @@
                             topTweets.push(data["top tweets"][i][k]);
                         }
                         // document.getElementById("loading").style.display = "none";
-                        if ((data["top tweets"][i].length > 1) && (data["average sentiment"][i] <= 1 || data["average sentiment"][i] >= -1)) {
+                        if ((data["top tweets"][i].length > 1) && (data["avgsentiment"][i] <= 1 || data["avgsentiment"][i] >= -1)) {
                             tempDiv.innerHTML = answerBoxTemplate(
                                 data["matches"][i],
                                 data["similarity"][i],
@@ -388,7 +391,9 @@
                                 data["country"][i],
                                 data["chamber"][i],
                                 data["party"][i],
-                                data["region"][i]
+                                data["region"][i],
+                                data["sentiment"][i],
+                                data["avgsent"][i]
                             );
                             found = true;
                             document.getElementById("answer-box").appendChild(tempDiv);
